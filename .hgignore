@@ -1,0 +1,6 @@
+syntax: glob
+
+lib
+.build
+
+test/test-main{,.exe}
