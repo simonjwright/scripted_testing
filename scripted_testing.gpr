@@ -1,5 +1,5 @@
 with "tash";
-project Scripted_Testing is
+library project Scripted_Testing is
 
    for Library_Name use "scripted_testing";
    for Library_Kind use "static";

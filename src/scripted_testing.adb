@@ -52,7 +52,12 @@ package body Scripted_Testing is
       procedure Create_Command (Position : Command_Maps.Cursor);
       procedure Create_Command (Position : Command_Maps.Cursor)
       is
+         --  This is a GNAT special; the warning is that Command_P
+         --  doesn't correspond to a C type. But we know that the size
+         --  has to be OK (it's checked).
+         pragma Warnings (Off, "in instantiation at*");
          package Creator is new Tcl.Ada.Generic_Command (Command_P);
+         pragma Warnings (On, "in instantiation at*");
          Command : Tcl.Tcl_Command;
          pragma Unreferenced (Command);
       begin

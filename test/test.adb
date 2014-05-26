@@ -17,4 +17,9 @@ package body Test is
       return Tcl.TCL_OK;
    end Tcl_Command;
 
+   The_Command : aliased First;
+
+begin
+   Scripted_Testing.Register (The_Command => The_Command'Access,
+                              To_Be_Named => "first");
 end Test;
