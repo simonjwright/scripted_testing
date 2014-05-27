@@ -30,9 +30,6 @@ package Scripted_Testing is
    --  is entirely string-based; this is important, considering the
    --  need to specifiy values of enumerated types.
 
-   --  type Datatype is abstract tagged limited private;
-   --  type Datatype_P is access all Datatype'Class;
-
    --  A Command corresponds to a script command. Commands to control
    --  the flow of execution of the test ("start", "wait <t>",
    --  "finish", for example) are provided as standard. Other commands
@@ -41,7 +38,6 @@ package Scripted_Testing is
    --  (where the parameters are those required by <procedure>) and
    --  "check_<procedure> <param1> <param2> ..." (to check the
    --  parameters passed on the last call to <procedure>).
-
    type Command is abstract tagged limited private;
    type Command_P is access all Command'Class;
 
@@ -56,27 +52,37 @@ package Scripted_Testing is
    procedure Register (The_Command : Command_P;
                        To_Be_Named : String);
 
-   type Calling_Command is abstract new Command with private;
-
-   type Checking_Command is abstract new Command with private;
-
-   type Setting_Command is abstract new Command with private;
-
-   --  Begin processing. Doesn't return.
+   --  Begin Tcl processing. Doesn't return (so all Commands must have
+   --  been Registered before Start is called).
    procedure Start;
+
+   --  The Commands that are called by a test script create matching
+   --  Events which are posted to an internal event queue; the 'go'
+   --  command (which should be the last in the test script), instead
+   --  of posting an event, starts the queue.
+   --
+   --  The initial set of events would normally correspond to setup,
+   --  for example arranging for stubbed lower-level interface calls
+   --  to return appropriate values.
+   --
+   --  Once setup is complete, the software under test can start; how
+   --  this is done depends on the framework in use. For example, with
+   --  ColdFrame, the Dispatcher would be started.
+   type Event is abstract tagged private;
+
+   --  Events are picked off the queue and Execute is called for each,
+   --  until either the end of the queue is reached (which would
+   --  indicate that the test script succeeded) or execution returns
+   --  Failure.
+   type Status is (Failure, Success);
+   function Execute (E : Event) return Status is abstract;
+
+   procedure Post (The_Event : Event'Class);
 
 private
 
    type Command is abstract tagged limited null record;
 
-   type Calling_Command is abstract new Command with null record;
-
-   type Checking_Command is abstract new Command with null record;
-
-   type Setting_Command is abstract new Command with null record;
-
-   type Control_Command is abstract new Command with null record;
-   --  Used for "wait", "mark" etc. Users won't need to extend this,
-   --  unless I've missed something ...
+   type Event is abstract tagged null record;
 
 end Scripted_Testing;
