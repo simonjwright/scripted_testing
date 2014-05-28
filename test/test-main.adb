@@ -1,3 +1,4 @@
+with Scripted_Testing;
 procedure Test.Main is
 begin
    Scripted_Testing.Start;

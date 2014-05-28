@@ -2,7 +2,6 @@ with Ada.Calendar;
 with Ada.Containers.Indefinite_Ordered_Maps;
 with Ada.Containers.Indefinite_Vectors;
 with Ada.Exceptions;
-with Ada.Strings.Unbounded;
 with Ada.Text_IO; use Ada.Text_IO;
 with Tcl.Ada;
 
@@ -138,10 +137,28 @@ package body Scripted_Testing is
 
    Queue : Event_Vectors.Vector;
 
-   procedure Post (The_Event : Event'Class)
+   function Source_Line (E : Event) return String
    is
    begin
-      Queue.Append (The_Event);
+      return +E.Source_Line;
+   end Source_Line;
+
+
+   procedure Post (The_Event : Event'Class;
+                   From : Tcl.Tcl_Interp)
+   is
+      Copy : Event'Class := The_Event;
+      Source_Line_Status : constant Interfaces.C.int
+        := Tcl.Ada.Tcl_Eval
+          (From,
+           "set inf [info frame -1];"
+             & " return ""[dict get $inf file]:[dict get $inf line]""");
+      use type Interfaces.C.int;
+   begin
+      if Source_Line_Status = Tcl.TCL_RETURN then
+         Copy.Source_Line := +Tcl.Ada.Tcl_GetStringResult (From);
+      end if;
+      Queue.Append (Copy);
    end Post;
 
 
@@ -186,7 +203,7 @@ package body Scripted_Testing is
       Argc   :        Interfaces.C.int;
       Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
-      pragma Unreferenced (C, Interp);
+      pragma Unreferenced (C);
       use type Interfaces.C.int;
    begin
       if Argc /= 2 then
@@ -194,7 +211,8 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
       end if;
       Post (Echo_Event'(Event
-                        with Text => +CArgv.Arg (Argv, 1)));
+                        with Text => +CArgv.Arg (Argv, 1)),
+            From => Interp);
       return Tcl.TCL_OK;
    exception
       when E : others =>
@@ -284,7 +302,7 @@ package body Scripted_Testing is
       Argc   :        Interfaces.C.int;
       Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
-      pragma Unreferenced (C, Interp);
+      pragma Unreferenced (C);
       use type Interfaces.C.int;
    begin
       if Argc /= 2 then
@@ -292,7 +310,8 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
       end if;
       Post (Mark_Event'(Event
-                        with Name => +CArgv.Arg (Argv, 1)));
+                        with Name => +CArgv.Arg (Argv, 1)),
+            From => Interp);
       return Tcl.TCL_OK;
    exception
       when E : others =>
@@ -340,7 +359,7 @@ package body Scripted_Testing is
       Argc   :        Interfaces.C.int;
       Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
-      pragma Unreferenced (C, Interp);
+      pragma Unreferenced (C);
       use type Interfaces.C.int;
    begin
       if Argc /= 2 then
@@ -348,7 +367,8 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
       end if;
       Post (Wait_Event'(Event
-                        with Period => Duration'Value (CArgv.Arg (Argv, 1))));
+                        with Period => Duration'Value (CArgv.Arg (Argv, 1))),
+            From => Interp);
       return Tcl.TCL_OK;
    exception
       when E : others =>
@@ -391,17 +411,19 @@ package body Scripted_Testing is
       Argc   :        Interfaces.C.int;
       Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
-      pragma Unreferenced (C, Interp);
+      pragma Unreferenced (C);
       use type Interfaces.C.int;
    begin
       if Argc /= 3 then
          Put_Line (Standard_Error, "'wait_from_mark' requires 2 arguments");
          return Tcl.TCL_ERROR;
       end if;
-      Post (Wait_From_Mark_Event'
-        (Event with
-         Name => +(CArgv.Arg (Argv, 1)),
-         Period => Duration'Value (CArgv.Arg (Argv, 2))));
+      Post
+        (Wait_From_Mark_Event'
+           (Event with
+            Name => +(CArgv.Arg (Argv, 1)),
+            Period => Duration'Value (CArgv.Arg (Argv, 2))),
+         From => Interp);
       return Tcl.TCL_OK;
    exception
       when E : others =>
@@ -430,7 +452,9 @@ package body Scripted_Testing is
             Put (Standard_Error,
                  "mark '"
                    & Name
-                   & "' passed"
+                   & "'  at "
+                   & Source_Line (E)
+                   & " passed"
                    & Duration'Image (Now - End_Of_Wait)
                    & " seconds ago");
             return Failure;

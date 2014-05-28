@@ -1,7 +1,8 @@
 with Interfaces.C;
-
 with CArgv;
 with Tcl;
+
+private with Ada.Strings.Unbounded;
 
 package Scripted_Testing is
 
@@ -80,7 +81,11 @@ package Scripted_Testing is
    type Status is (Failure, Success);
    function Execute (E : Event) return Status is abstract;
 
-   procedure Post (The_Event : Event'Class);
+   --  The scriptfile:line at which the event was created.
+   function Source_Line (E : Event) return String;
+
+   procedure Post (The_Event : Event'Class;
+                   From : Tcl.Tcl_Interp);
 
    --  Begin Tcl processing (and read the test script). Doesn't return
    --  (so all Commands must have been Registered before Start is
@@ -91,6 +96,8 @@ private
 
    type Command is abstract tagged limited null record;
 
-   type Event is abstract tagged null record;
+   type Event is abstract tagged record
+      Source_Line : Ada.Strings.Unbounded.Unbounded_String;
+   end record;
 
 end Scripted_Testing;
