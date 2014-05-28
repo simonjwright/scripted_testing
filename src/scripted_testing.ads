@@ -31,7 +31,7 @@ package Scripted_Testing is
    --  need to specifiy values of enumerated types.
 
    --  A Command corresponds to a script command. Commands to control
-   --  the flow of execution of the test ("start", "wait <t>",
+   --  the flow of execution of the test ("go", "wait <t>",
    --  "finish", for example) are provided as standard. Other commands
    --  are to be provided to support the specific application to be
    --  tested: typically, "call_<procedure> <param1> <param2> ..."
@@ -41,6 +41,8 @@ package Scripted_Testing is
    type Command is abstract tagged limited private;
    type Command_P is access all Command'Class;
 
+   --  Called by Tcl to implement the command. Must return either
+   --  Tcl.TCL_OK or Tcl.TCL_ERROR.
    function Tcl_Command
      (C      : access Command;
       Interp :        Tcl.Tcl_Interp;
@@ -51,10 +53,6 @@ package Scripted_Testing is
    --  A Command is to be registered with the Tcl interpreter.
    procedure Register (The_Command : Command_P;
                        To_Be_Named : String);
-
-   --  Begin Tcl processing. Doesn't return (so all Commands must have
-   --  been Registered before Start is called).
-   procedure Start;
 
    --  The Commands that are called by a test script create matching
    --  Events which are posted to an internal event queue; the 'go'
@@ -74,10 +72,20 @@ package Scripted_Testing is
    --  until either the end of the queue is reached (which would
    --  indicate that the test script succeeded) or execution returns
    --  Failure.
+   --
+   --  Text output: if the text is reporting a reason for failure (and
+   --  the return value is therefore Failure), use Ada.Text_IO.Put to
+   --  Standard_Error, because Tcl will add its own newline. Otherwise
+   --  use Put_Line to Standard_Output.
    type Status is (Failure, Success);
    function Execute (E : Event) return Status is abstract;
 
    procedure Post (The_Event : Event'Class);
+
+   --  Begin Tcl processing (and read the test script). Doesn't return
+   --  (so all Commands must have been Registered before Start is
+   --  called).
+   procedure Start;
 
 private
 

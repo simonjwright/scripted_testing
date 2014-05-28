@@ -416,7 +416,7 @@ package body Scripted_Testing is
       use type Mark_Maps.Cursor;
    begin
       if Position = Mark_Maps.No_Element then
-         Put_Line (Standard_Error, "no mark '" & Name & "'");
+         Put (Standard_Error, "no mark '" & Name & "'");
          return Failure;
       end if;
       declare
@@ -427,12 +427,12 @@ package body Scripted_Testing is
       begin
          Marks.Delete (Position => Position);
          if End_Of_Wait < Now then
-            Put_Line (Standard_Error,
-                      "mark '"
-                        & Name
-                        & "' passed"
-                        & Duration'Image (Now - End_Of_Wait)
-                        & " seconds ago");
+            Put (Standard_Error,
+                 "mark '"
+                   & Name
+                   & "' passed"
+                   & Duration'Image (Now - End_Of_Wait)
+                   & " seconds ago");
             return Failure;
          else
             delay until End_Of_Wait;
