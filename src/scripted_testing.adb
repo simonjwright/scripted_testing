@@ -139,8 +139,13 @@ package body Scripted_Testing is
 
    function Source_Line (E : Event) return String
    is
+      Result : constant String := +E.Source;
    begin
-      return +E.Source;
+      if Result'Length > 0 then
+         return Result;
+      else
+         return "(unknown)";
+      end if;
    end Source_Line;
 
 
@@ -148,13 +153,22 @@ package body Scripted_Testing is
                    Interp    : Tcl.Tcl_Interp)
    is
       Copy : Event'Class := The_Event;
+      --  There seems to be no way to invoke the 'info' command
+      --  programmatically, so we evaluate the Tcl version.
+      --
+      --  The reason for the 'catch' is that 'info frame -1' fails if
+      --  the command is executed from the Tcl command line, rather
+      --  than a script, and the 'dict get $inf file' call finds no
+      --  'file' key. We have to use 'info frame -3' because of the
+      --  extra stack frames used by the 'if/catch' construct.
+      --
+      --  You might think this is overkill for a feature (invocation
+      --  from the command line) that will hardly ever be used.
+      Script : constant String :=
+        "if {![catch {info frame -3} inf]} "
+        & "{return ""[file tail [dict get $inf file]]:[dict get $inf line]""}";
       Source_Line_Status : constant Interfaces.C.int
-        := Tcl.Ada.Tcl_Eval
-          (Interp,
-           "set inf [info frame -1];"
-             & " return ""[file tail [dict get $inf file]]"
-             & ":"
-             & "[dict get $inf line]""");
+        := Tcl.Ada.Tcl_Eval (Interp, Script);
       use type Interfaces.C.int;
    begin
       if Source_Line_Status = Tcl.TCL_RETURN then
