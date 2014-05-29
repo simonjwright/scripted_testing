@@ -140,23 +140,25 @@ package body Scripted_Testing is
    function Source_Line (E : Event) return String
    is
    begin
-      return +E.Source_Line;
+      return +E.Source;
    end Source_Line;
 
 
    procedure Post (The_Event : Event'Class;
-                   From : Tcl.Tcl_Interp)
+                   Interp    : Tcl.Tcl_Interp)
    is
       Copy : Event'Class := The_Event;
       Source_Line_Status : constant Interfaces.C.int
         := Tcl.Ada.Tcl_Eval
-          (From,
+          (Interp,
            "set inf [info frame -1];"
-             & " return ""[dict get $inf file]:[dict get $inf line]""");
+             & " return ""[file tail [dict get $inf file]]"
+             & ":"
+             & "[dict get $inf line]""");
       use type Interfaces.C.int;
    begin
       if Source_Line_Status = Tcl.TCL_RETURN then
-         Copy.Source_Line := +Tcl.Ada.Tcl_GetStringResult (From);
+         Copy.Source := +Tcl.Ada.Tcl_GetStringResult (Interp);
       end if;
       Queue.Append (Copy);
    end Post;
@@ -212,7 +214,7 @@ package body Scripted_Testing is
       end if;
       Post (Echo_Event'(Event
                         with Text => +CArgv.Arg (Argv, 1)),
-            From => Interp);
+            Interp => Interp);
       return Tcl.TCL_OK;
    exception
       when E : others =>
@@ -311,7 +313,7 @@ package body Scripted_Testing is
       end if;
       Post (Mark_Event'(Event
                         with Name => +CArgv.Arg (Argv, 1)),
-            From => Interp);
+            Interp => Interp);
       return Tcl.TCL_OK;
    exception
       when E : others =>
@@ -368,7 +370,7 @@ package body Scripted_Testing is
       end if;
       Post (Wait_Event'(Event
                         with Period => Duration'Value (CArgv.Arg (Argv, 1))),
-            From => Interp);
+            Interp => Interp);
       return Tcl.TCL_OK;
    exception
       when E : others =>
@@ -423,7 +425,7 @@ package body Scripted_Testing is
            (Event with
             Name => +(CArgv.Arg (Argv, 1)),
             Period => Duration'Value (CArgv.Arg (Argv, 2))),
-         From => Interp);
+         Interp => Interp);
       return Tcl.TCL_OK;
    exception
       when E : others =>
@@ -438,7 +440,7 @@ package body Scripted_Testing is
       use type Mark_Maps.Cursor;
    begin
       if Position = Mark_Maps.No_Element then
-         Put (Standard_Error, "no mark '" & Name & "'");
+         Put (Standard_Error, "no mark '" & Name & "' at " & E.Source_Line);
          return Failure;
       end if;
       declare
@@ -452,8 +454,8 @@ package body Scripted_Testing is
             Put (Standard_Error,
                  "mark '"
                    & Name
-                   & "'  at "
-                   & Source_Line (E)
+                   & "' at "
+                   & E.Source_Line
                    & " passed"
                    & Duration'Image (Now - End_Of_Wait)
                    & " seconds ago");

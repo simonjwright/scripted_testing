@@ -34,7 +34,7 @@ package body Test is
       Scripted_Testing.Post
         (First_Event'(Scripted_Testing.Event with
                       null record),
-         From => Interp);
+         Interp => Interp);
       return Tcl.TCL_OK;
    end Tcl_Command;
 

@@ -84,8 +84,9 @@ package Scripted_Testing is
    --  The scriptfile:line at which the event was created.
    function Source_Line (E : Event) return String;
 
+   --  Used by Commands to post their corresponding Event.
    procedure Post (The_Event : Event'Class;
-                   From : Tcl.Tcl_Interp);
+                   Interp    : Tcl.Tcl_Interp);
 
    --  Begin Tcl processing (and read the test script). Doesn't return
    --  (so all Commands must have been Registered before Start is
@@ -97,7 +98,7 @@ private
    type Command is abstract tagged limited null record;
 
    type Event is abstract tagged record
-      Source_Line : Ada.Strings.Unbounded.Unbounded_String;
+      Source : Ada.Strings.Unbounded.Unbounded_String;
    end record;
 
 end Scripted_Testing;
