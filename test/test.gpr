@@ -5,4 +5,19 @@ project Test is
    for Exec_Dir use ".";
    for Object_Dir use ".build";
 
+   package Builder is
+      for Default_Switches ("ada") use
+        (
+         "-g"        --  for debug symbols
+        );
+   end Builder;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-E");
+   end Binder;
+
+   package Linker is
+      for Default_Switches ("ada") use external_as_list ("LDFLAGS", " ");
+   end Linker;
+
 end Test;
