@@ -71,15 +71,14 @@ package Scripted_Testing is
 
    --  Events are picked off the queue and Execute is called for each,
    --  until either the end of the queue is reached (which would
-   --  indicate that the test script succeeded) or execution returns
-   --  Failure.
-   --
-   --  Text output: if the text is reporting a reason for failure (and
-   --  the return value is therefore Failure), use Ada.Text_IO.Put to
-   --  Standard_Error, because Tcl will add its own newline. Otherwise
-   --  use Put_Line to Standard_Output.
-   type Status is (Failure, Success);
-   function Execute (E : Event) return Status is abstract;
+   --  indicate that the test script succeeded) or execution raises
+   --  an exception.
+   procedure Execute (E : Event) is abstract;
+
+   --  Used to report a script failure (for example, attempting to
+   --  wait for a mark that hasn't been set). Any exception message is
+   --  reported.
+   Execution_Failure : exception;
 
    --  The scriptfile:line at which the event was created.
    function Source_Line (E : Event) return String;

@@ -211,7 +211,7 @@ package body Scripted_Testing is
    end record;
 
    overriding
-   function Execute (E : Echo_Event) return Status;
+   procedure Execute (E : Echo_Event);
 
    function Tcl_Command
      (C      : access Echo_Command;
@@ -236,11 +236,10 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   function Execute (E : Echo_Event) return Status
+   procedure Execute (E : Echo_Event)
    is
    begin
       Put_Line (Standard_Error, "echo: " & (+E.Text));
-      return Success;
    end Execute;
 
    Echo : aliased Echo_Command;
@@ -263,12 +262,12 @@ package body Scripted_Testing is
       Argc   :        Interfaces.C.int;
       Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
-      pragma Unreferenced (C, Interp, Argv);
+      pragma Unreferenced (C, Argv);
       use type Interfaces.C.int;
       use type Ada.Containers.Count_Type;
    begin
       if Argc /= 1 then
-         Put_Line (Standard_Error, "'go' requires 1 argument");
+         Put_Line (Standard_Error, "'go' requires zero arguments");
          return Tcl.TCL_ERROR;
       end if;
 
@@ -278,17 +277,22 @@ package body Scripted_Testing is
             E : constant Event'Class := Queue.First_Element;
          begin
             Queue.Delete_First;
-            if E.Execute = Failure then
-               return Tcl.TCL_ERROR;
-            end if;
+            E.Execute;
+         exception
+            when EF : Execution_Failure =>
+               Tcl.Ada.Tcl_AddErrorInfo
+                 (Interp,
+                  +E.Source & ": " & Ada.Exceptions.Exception_Message (EF));
+            return Tcl.TCL_ERROR;
+            when O : others =>
+               Tcl.Ada.Tcl_AddErrorInfo
+                 (Interp,
+                  +E.Source & ": " & Ada.Exceptions.Exception_Information (O));
+            return Tcl.TCL_ERROR;
          end;
       end loop;
 
       return Tcl.TCL_OK;
-   exception
-      when E : others =>
-         Put (Standard_Error, Ada.Exceptions.Exception_Message (E));
-         return Tcl.TCL_ERROR;
    end Tcl_Command;
 
    Go : aliased Go_Command;
@@ -310,7 +314,7 @@ package body Scripted_Testing is
    end record;
 
    overriding
-   function Execute (E : Mark_Event) return Status;
+   procedure Execute (E : Mark_Event);
 
    function Tcl_Command
      (C      : access Mark_Command;
@@ -335,7 +339,7 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   function Execute (E : Mark_Event) return Status
+   procedure Execute (E : Mark_Event)
    is
       Name : constant String := +E.Name;
    begin
@@ -345,7 +349,6 @@ package body Scripted_Testing is
       else
          Marks.Insert (Key => Name, New_Item => Ada.Calendar.Clock);
       end if;
-      return Success;
    end Execute;
 
    Mark : aliased Mark_Command;
@@ -367,7 +370,7 @@ package body Scripted_Testing is
    end record;
 
    overriding
-   function Execute (E : Wait_Event) return Status;
+   procedure Execute (E : Wait_Event);
 
    function Tcl_Command
      (C      : access Wait_Command;
@@ -392,11 +395,10 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   function Execute (E : Wait_Event) return Status
+   procedure Execute (E : Wait_Event)
    is
    begin
       delay E.Period;
-      return Success;
    end Execute;
 
    Wait : aliased Wait_Command;
@@ -419,7 +421,7 @@ package body Scripted_Testing is
    end record;
 
    overriding
-   function Execute (E : Wait_From_Mark_Event) return Status;
+   procedure Execute (E : Wait_From_Mark_Event);
 
    function Tcl_Command
      (C      : access Wait_From_Mark_Command;
@@ -447,15 +449,14 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   function Execute (E : Wait_From_Mark_Event) return Status
+   procedure Execute (E : Wait_From_Mark_Event)
    is
       Name     : constant String  := +E.Name;
       Position : Mark_Maps.Cursor := Marks.Find (Name);
       use type Mark_Maps.Cursor;
    begin
       if Position = Mark_Maps.No_Element then
-         Put (Standard_Error, "no mark '" & Name & "' at " & E.Source_Line);
-         return Failure;
+         raise Execution_Failure with "no mark '" & Name;
       end if;
       declare
          use type Ada.Calendar.Time;
@@ -465,18 +466,14 @@ package body Scripted_Testing is
       begin
          Marks.Delete (Position => Position);
          if End_Of_Wait < Now then
-            Put (Standard_Error,
-                 "mark '"
-                   & Name
-                   & "' at "
-                   & E.Source_Line
-                   & " passed"
-                   & Duration'Image (Now - End_Of_Wait)
-                   & " seconds ago");
-            return Failure;
+            raise Execution_Failure
+              with ("mark '"
+                      & Name
+                      & " passed"
+                      & Duration'Image (Now - End_Of_Wait)
+                      & " seconds ago");
          else
             delay until End_Of_Wait;
-            return Success;
          end if;
       end;
    end Execute;
