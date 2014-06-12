@@ -478,7 +478,6 @@ package body Scripted_Testing is
          End_Of_Wait : constant Ada.Calendar.Time
            := Mark_Maps.Element (Position) + E.Period;
       begin
-         Marks.Delete (Position => Position);
          if End_Of_Wait < Now then
             raise Execution_Failure
               with ("mark '"
