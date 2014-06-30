@@ -297,12 +297,12 @@ package body Scripted_Testing is
                Tcl.Ada.Tcl_AddErrorInfo
                  (Interp,
                   +E.Source & ": " & Ada.Exceptions.Exception_Message (EF));
-            return Tcl.TCL_ERROR;
+               return Tcl.TCL_ERROR;
             when O : others =>
                Tcl.Ada.Tcl_AddErrorInfo
                  (Interp,
                   +E.Source & ": " & Ada.Exceptions.Exception_Information (O));
-            return Tcl.TCL_ERROR;
+               return Tcl.TCL_ERROR;
          end;
       end loop;
 
@@ -466,7 +466,7 @@ package body Scripted_Testing is
    procedure Execute (E : Wait_From_Mark_Event)
    is
       Name     : constant String  := +E.Name;
-      Position : Mark_Maps.Cursor := Marks.Find (Name);
+      Position : constant Mark_Maps.Cursor := Marks.Find (Name);
       use type Mark_Maps.Cursor;
    begin
       if Position = Mark_Maps.No_Element then
@@ -482,7 +482,7 @@ package body Scripted_Testing is
             raise Execution_Failure
               with ("mark '"
                       & Name
-                      & " passed"
+                      & "' passed"
                       & Duration'Image (Now - End_Of_Wait)
                       & " seconds ago");
          else

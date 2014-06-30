@@ -30,10 +30,10 @@ package Scripted_Testing is
    --  * 'in' and 'in out' parameters can be recorded for later
    --  checking,
    --
-   --  * 'out' (and 'inout') parameters can provided to be returned to
-   --  the SUT,
+   --  * 'out' (and 'in out') parameters can provided to be returned
+   --  to the SUT,
    --
-   --  * exceptions can be raised whn required,
+   --  * exceptions can be raised when required,
    --
    --  * the number of calls to the subprogram can be checked.
    --
