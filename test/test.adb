@@ -26,101 +26,22 @@ package body Test is
    function "+" (S : Ada.Strings.Unbounded.Unbounded_String) return String
      renames Ada.Strings.Unbounded.To_String;
 
-   --  first
+   package First is
+   private
+      procedure Initialize;
+   end First;
+   package body First is separate;
 
-   type First is new Scripted_Testing.Command with null record;
-   overriding
-   function Tcl_Command
-     (C      : access First;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
+   package Except is
+   private
+      procedure Initialize;
+   end Except;
+   package body Except is separate;
 
-   type First_Event is new Scripted_Testing.Event with null record;
-   overriding
-   procedure Execute (E : First_Event);
+   package Lists is
+   private
+      procedure Initialize;
+   end Lists;
+   package body Lists is separate;
 
-   function Tcl_Command
-     (C      : access First;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
-   is
-      use type Interfaces.C.int;
-      pragma Unreferenced (C);
-   begin
-      Put_Line ("'first' called from Ada.");
-      for J in 0 .. Argc - 1 loop
-         Put_Line ("arg" & J'Img & " " & CArgv.Arg (Argv, J));
-      end loop;
-      Scripted_Testing.Post
-        (First_Event'(Scripted_Testing.Event with
-                      null record),
-         Interp => Interp);
-      return Tcl.TCL_OK;
-   end Tcl_Command;
-
-   procedure Execute (E : First_Event)
-   is
-   begin
-      Put_Line ("first called at " & E.Source_Line);
-   end Execute;
-
-   The_First_Command : aliased First;
-
-   --  except
-
-   type Except is new Scripted_Testing.Command with null record;
-   overriding
-   function Tcl_Command
-     (C      : access Except;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
-
-   type Except_Event is new Scripted_Testing.Event with record
-      Str : Ada.Strings.Unbounded.Unbounded_String;
-   end record;
-   overriding
-   procedure Execute (E : Except_Event);
-
-   function Tcl_Command
-     (C      : access Except;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
-   is
-      pragma Unreferenced (C);
-      Str : Ada.Strings.Unbounded.Unbounded_String;
-      use type Ada.Strings.Unbounded.Unbounded_String;
-      use type Interfaces.C.int;
-   begin
-      Put_Line ("'except' called from Ada.");
-      for J in 0 .. Argc - 1 loop
-         Str := Str & CArgv.Arg (Argv, J);
-         if J < Argc - 1 then
-            Str := Str & " ";
-         end if;
-      end loop;
-      Scripted_Testing.Post
-        (Except_Event'(Scripted_Testing.Event with
-                       Str => Str),
-         Interp => Interp);
-      return Tcl.TCL_OK;
-   end Tcl_Command;
-
-   procedure Execute (E : Except_Event)
-   is
-   begin
-      Put_Line ("except called at " & E.Source_Line);
-      raise Constraint_Error with +E.Str;
-   end Execute;
-
-   The_Except_Command : aliased Except;
-
-begin
-   Scripted_Testing.Register (The_Command => The_First_Command'Access,
-                              To_Be_Named => "first");
-   Scripted_Testing.Register (The_Command => The_Except_Command'Access,
-                              To_Be_Named => "except");
 end Test;

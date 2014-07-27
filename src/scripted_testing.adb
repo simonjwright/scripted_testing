@@ -48,8 +48,13 @@ package body Scripted_Testing is
    function Init (Interp : in Tcl.Tcl_Interp) return Interfaces.C.int;
    pragma Convention (C, Init);
 
+   --  This is the Tcl_CmdProc that is invoked for all Commands. The
+   --  Cmd parameter is, from the Tcl point of view, ClientData, which
+   --  is an opaque pointer-sized object. From the Ada point of view,
+   --  it's an access-to-classwide which is dispatched on to invoke
+   --  the Ada Tcl_Command for the actual Command instance.
    function Classwide_Tcl_Command
-     (C      : Command_P;
+     (Cmd    : Command_P;
       Interp : Tcl.Tcl_Interp;
       Argc   : Interfaces.C.int;
       Argv   : CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
@@ -92,10 +97,10 @@ package body Scripted_Testing is
       begin
          Command := Creator.Tcl_CreateCommand
            (Interp,
-            Command_Maps.Key (Position),
-            Classwide_Tcl_Command'Access,
-            Command_Maps.Element (Position),
-            null);
+            cmdName    => Command_Maps.Key (Position),
+            proc       => Classwide_Tcl_Command'Access,
+            data       => Command_Maps.Element (Position),
+            deleteProc => null);
       end Create_Command;
       use type Interfaces.C.int;
    begin
@@ -104,6 +109,8 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
       end if;
 
+      --  Create the Tcl-side Commands corresponding to the registered
+      --  Ada Tcl_Commands.
       Commands.Iterate (Create_Command'Access);
 
       --  Specify a user-specific startup file to invoke if the
@@ -131,13 +138,13 @@ package body Scripted_Testing is
    end Init;
 
    function Classwide_Tcl_Command
-     (C      : Command_P;
+     (Cmd    : Command_P;
       Interp : Tcl.Tcl_Interp;
       Argc   : Interfaces.C.int;
       Argv   : CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
    begin
-      return C.Tcl_Command (Interp, Argc, Argv);
+      return Cmd.Tcl_Command (Interp, Argc, Argv);
    end Classwide_Tcl_Command;
 
 
@@ -200,7 +207,7 @@ package body Scripted_Testing is
    package Mark_Maps is new Ada.Containers.Indefinite_Ordered_Maps
      (Key_Type     => String,
       Element_Type => Ada.Calendar.Time,
-      "=" => Ada.Calendar."=");
+      "="          => Ada.Calendar."=");
 
    Marks : Mark_Maps.Map;
 

@@ -46,13 +46,13 @@ package Scripted_Testing is
    --  need to specifiy values of enumerated types.
 
    --  A Command corresponds to a script command. Commands to control
-   --  the flow of execution of the test ("go", "wait <t>",
-   --  "finish", for example) are provided as standard. Other commands
-   --  are to be provided to support the specific application to be
-   --  tested: typically, "call_<procedure> <param1> <param2> ..."
-   --  (where the parameters are those required by <procedure>) and
-   --  "check_<procedure> <param1> <param2> ..." (to check the
-   --  parameters passed on the last call to <procedure>).
+   --  the flow of execution of the test ("go", "wait <t>", "finish",
+   --  for example) are provided as standard. Other commands are to be
+   --  provided to support the specific application to be tested:
+   --  typically, "call_<procedure> <param1> <param2> ..."  (where the
+   --  parameters are those required by <procedure>) and
+   --  "check_<subprogram> <parameter> <param>" (to check the
+   --  value passed to <procedure> in <parameter> on the last call).
    type Command is abstract tagged limited private;
    type Command_P is access all Command'Class;
 
