@@ -63,6 +63,8 @@ package body Scripted_Testing is
    procedure Register (The_Command : Command_P;
                        To_Be_Named : String)
    is
+      --  Note, this procedure doesn't actually register the command;
+      --  that's done in Init.
    begin
       Commands.Insert (Key => To_Be_Named, New_Item => The_Command);
    end Register;
@@ -244,7 +246,7 @@ package body Scripted_Testing is
       use type Interfaces.C.int;
    begin
       if Argc /= 2 then
-         Put_Line (Standard_Error, "'echo' requires 1 argument");
+         Tcl.Ada.Tcl_SetResult (Interp, "'echo' requires 1 argument");
          return Tcl.TCL_ERROR;
       end if;
       Post (Echo_Event'(Event
@@ -288,7 +290,7 @@ package body Scripted_Testing is
       use type Ada.Containers.Count_Type;
    begin
       if Argc /= 1 then
-         Put_Line (Standard_Error, "'go' requires zero arguments");
+         Tcl.Ada.Tcl_SetResult (Interp, "'go' requires zero arguments");
          return Tcl.TCL_ERROR;
       end if;
 
@@ -300,13 +302,22 @@ package body Scripted_Testing is
             Queue.Delete_First;
             E.Execute;
          exception
+            --  On error, we clear the extant events and marks, not
+            --   because a normal script would need this (we recommend
+            --   a single 'go' per script, which _should_ run to
+            --   completion) but to make testing the basic commands
+            --   easier.
             when EF : Execution_Failure =>
-               Tcl.Ada.Tcl_AddErrorInfo
+               Queue.Clear;
+               Marks.Clear;
+               Tcl.Ada.Tcl_SetResult
                  (Interp,
                   +E.Source & ": " & Ada.Exceptions.Exception_Message (EF));
                return Tcl.TCL_ERROR;
             when O : others =>
-               Tcl.Ada.Tcl_AddErrorInfo
+               Queue.Clear;
+               Marks.Clear;
+               Tcl.Ada.Tcl_SetResult
                  (Interp,
                   +E.Source & ": " & Ada.Exceptions.Exception_Information (O));
                return Tcl.TCL_ERROR;
@@ -347,7 +358,7 @@ package body Scripted_Testing is
       use type Interfaces.C.int;
    begin
       if Argc /= 2 then
-         Put_Line (Standard_Error, "'mark' requires 1 argument");
+         Tcl.Ada.Tcl_SetResult (Interp, "'mark' requires 1 argument");
          return Tcl.TCL_ERROR;
       end if;
       Post (Mark_Event'(Event
@@ -403,7 +414,7 @@ package body Scripted_Testing is
       use type Interfaces.C.int;
    begin
       if Argc /= 2 then
-         Put_Line (Standard_Error, "'wait' requires 1 argument");
+         Tcl.Ada.Tcl_SetResult (Interp, "'wait' requires 1 argument");
          return Tcl.TCL_ERROR;
       end if;
       Post (Wait_Event'(Event
@@ -412,7 +423,7 @@ package body Scripted_Testing is
       return Tcl.TCL_OK;
    exception
       when E : others =>
-         Put (Standard_Error, Ada.Exceptions.Exception_Message (E));
+         Tcl.Ada.Tcl_SetResult (Interp, Ada.Exceptions.Exception_Message (E));
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
@@ -454,7 +465,8 @@ package body Scripted_Testing is
       use type Interfaces.C.int;
    begin
       if Argc /= 3 then
-         Put_Line (Standard_Error, "'wait_from_mark' requires 2 arguments");
+         Tcl.Ada.Tcl_SetResult
+           (Interp, "'wait_from_mark' requires 2 arguments");
          return Tcl.TCL_ERROR;
       end if;
       Post
@@ -466,7 +478,7 @@ package body Scripted_Testing is
       return Tcl.TCL_OK;
    exception
       when E : others =>
-         Put (Standard_Error, Ada.Exceptions.Exception_Message (E));
+         Tcl.Ada.Tcl_SetResult (Interp, Ada.Exceptions.Exception_Message (E));
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
@@ -477,7 +489,7 @@ package body Scripted_Testing is
       use type Mark_Maps.Cursor;
    begin
       if Position = Mark_Maps.No_Element then
-         raise Execution_Failure with "no mark '" & Name;
+         raise Execution_Failure with "no mark '" & Name & "'";
       end if;
       declare
          use type Ada.Calendar.Time;

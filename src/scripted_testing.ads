@@ -46,15 +46,31 @@ package Scripted_Testing is
    --  need to specifiy values of enumerated types.
 
    --  A Command corresponds to a script command. Commands to control
-   --  the flow of execution of the test ("go", "wait <t>", "finish",
-   --  for example) are provided as standard. Other commands are to be
-   --  provided to support the specific application to be tested:
-   --  typically, "call_<procedure> <param1> <param2> ..."  (where the
-   --  parameters are those required by <procedure>) and
-   --  "check_<subprogram> <parameter> <param>" (to check the
-   --  value passed to <procedure> in <parameter> on the last call).
+   --  the flow of execution of the test are provided as
+   --  standard. Other commands are to be provided to support the
+   --  specific application to be tested: typically, "call_<procedure>
+   --  <param1> <param2> ..."  (where the parameters are those
+   --  required by <procedure>) and "check_<subprogram> <parameter>
+   --  <value>" (to check the value passed to <procedure> in
+   --  <parameter> on the last call).
+   --
+   --  The standard commands are
+   --
+   --  echo "string": outputs "string" to the terminal at run
+   --  time. Useful to mark the script's progress.
+   --
+   --  wait <duration>: delays for <duration>.
+   --
+   --  mark <name>: notes the time at which the command was executed.
+   --
+   --  wait_from_mark <name> <duration>: delays until <duration> after
+   --  the <name>d mark. It is an error if the indicated time has
+   --  already passed. The mark can be re-used.
+   --
+   --  go: start executing the script (see below).
    type Command is abstract tagged limited private;
    type Command_P is access all Command'Class;
+   pragma Convention (C, Command_P);
 
    --  Called by Tcl to implement the command. Must return either
    --  Tcl.TCL_OK or Tcl.TCL_ERROR.
