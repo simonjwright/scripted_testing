@@ -75,3 +75,25 @@ clean:
 	#-gnatclean -P scripted_testing.gpr -XLIBRARY_TYPE=relocatable
 	rm -f *-stamp
 .PHONY: clean
+
+# Docs
+
+DOCS = doc/index.html doc/sf.css
+RSYNC ?= rsync
+SFUSER ?= simonjwright
+
+upload-docs: $(DOCS) force
+	$(RSYNC)							\
+	  --compress							\
+	  --copy-unsafe-links						\
+	  --cvs-exclude							\
+	  --perms							\
+	  --recursive							\
+	  --rsh=ssh							\
+	  --times							\
+	  --update							\
+	  --verbose							\
+	  $(DOCS)							\
+	  $(SFUSER),coldframe@web.sourceforge.net:htdocs/scripted_testing
+
+.PHONY: force
