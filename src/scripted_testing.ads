@@ -74,16 +74,17 @@ package Scripted_Testing is
 
    --  Called by Tcl to implement the command. Must return either
    --  Tcl.TCL_OK or Tcl.TCL_ERROR.
+   not overriding
    function Tcl_Command
-     (C      : access Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
+     (C      : not null access Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
      is abstract;
 
    --  A Command is to be registered with the Tcl interpreter.
-   procedure Register (The_Command : Command_P;
-                       To_Be_Named : String);
+   procedure Register (The_Command : not null Command_P;
+                       To_Be_Named :          String);
 
    --  The Commands that are called by a test script create matching
    --  Events which are posted to an internal event queue; the 'go'
@@ -103,6 +104,7 @@ package Scripted_Testing is
    --  until either the end of the queue is reached (which would
    --  indicate that the test script succeeded) or execution raises
    --  an exception.
+   not overriding
    procedure Execute (E : Event) is abstract;
 
    --  Used to report a script failure (for example, attempting to
@@ -111,11 +113,12 @@ package Scripted_Testing is
    Execution_Failure : exception;
 
    --  The scriptfile:line at which the event was created.
+   not overriding
    function Source_Line (E : Event) return String;
 
    --  Used by Commands to post their corresponding Event.
-   procedure Post (The_Event : Event'Class;
-                   Interp    : Tcl.Tcl_Interp);
+   procedure Post (The_Event :          Event'Class;
+                   Interp    : not null Tcl.Tcl_Interp);
 
    --  Begin Tcl processing (and read the test script). Doesn't return
    --  (so all Commands must have been Registered before Start is

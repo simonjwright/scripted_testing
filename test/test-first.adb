@@ -4,20 +4,20 @@ package body First is
    type First is new Scripted_Testing.Command with null record;
    overriding
    function Tcl_Command
-     (C      : access First;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
+     (C      : not null access First;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
    type First_Event is new Scripted_Testing.Event with null record;
    overriding
    procedure Execute (E : First_Event);
 
    function Tcl_Command
-     (C      : access First;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
+     (C      : not null access First;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
       use type Interfaces.C.int;
       pragma Unreferenced (C);

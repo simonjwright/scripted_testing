@@ -60,8 +60,8 @@ package body Scripted_Testing is
       Argv   : CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
    pragma Convention (C, Classwide_Tcl_Command);
 
-   procedure Register (The_Command : Command_P;
-                       To_Be_Named : String)
+   procedure Register (The_Command : not null Command_P;
+                       To_Be_Named :          String)
    is
       --  Note, this procedure doesn't actually register the command;
       --  that's done in Init.
@@ -172,8 +172,8 @@ package body Scripted_Testing is
    end Source_Line;
 
 
-   procedure Post (The_Event : Event'Class;
-                   Interp    : Tcl.Tcl_Interp)
+   procedure Post (The_Event :          Event'Class;
+                   Interp    : not null Tcl.Tcl_Interp)
    is
       Copy : Event'Class := The_Event;
       --  There seems to be no way to invoke the 'info' command
@@ -224,10 +224,10 @@ package body Scripted_Testing is
 
    overriding
    function Tcl_Command
-     (C      : access Echo_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
+     (C      : not null access Echo_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
    type Echo_Event is new Event with record
       Text : Ada.Strings.Unbounded.Unbounded_String;
@@ -237,10 +237,10 @@ package body Scripted_Testing is
    procedure Execute (E : Echo_Event);
 
    function Tcl_Command
-     (C      : access Echo_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
+     (C      : not null access Echo_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
       pragma Unreferenced (C);
       use type Interfaces.C.int;
@@ -274,16 +274,16 @@ package body Scripted_Testing is
 
    overriding
    function Tcl_Command
-     (C      : access Go_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
+     (C      : not null access Go_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
    function Tcl_Command
-     (C      : access Go_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
+     (C      : not null access Go_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
       pragma Unreferenced (C, Argv);
       use type Interfaces.C.int;
@@ -336,10 +336,10 @@ package body Scripted_Testing is
 
    overriding
    function Tcl_Command
-     (C      : access Mark_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
+     (C      : not null access Mark_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
    type Mark_Event is new Event with record
       Name : Ada.Strings.Unbounded.Unbounded_String;
@@ -349,10 +349,10 @@ package body Scripted_Testing is
    procedure Execute (E : Mark_Event);
 
    function Tcl_Command
-     (C      : access Mark_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
+     (C      : not null access Mark_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
       pragma Unreferenced (C);
       use type Interfaces.C.int;
@@ -392,10 +392,10 @@ package body Scripted_Testing is
 
    overriding
    function Tcl_Command
-     (C      : access Wait_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
+     (C      : not null access Wait_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
    type Wait_Event is new Event with record
       Period : Duration;
@@ -405,10 +405,10 @@ package body Scripted_Testing is
    procedure Execute (E : Wait_Event);
 
    function Tcl_Command
-     (C      : access Wait_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
+     (C      : not null access Wait_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
       pragma Unreferenced (C);
       use type Interfaces.C.int;
@@ -442,10 +442,10 @@ package body Scripted_Testing is
 
    overriding
    function Tcl_Command
-     (C      : access Wait_From_Mark_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
+     (C      : not null access Wait_From_Mark_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
    type Wait_From_Mark_Event is new Event with record
       Name   : Ada.Strings.Unbounded.Unbounded_String;
@@ -456,10 +456,10 @@ package body Scripted_Testing is
    procedure Execute (E : Wait_From_Mark_Event);
 
    function Tcl_Command
-     (C      : access Wait_From_Mark_Command;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
+     (C      : not null access Wait_From_Mark_Command;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
       pragma Unreferenced (C);
       use type Interfaces.C.int;

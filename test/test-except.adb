@@ -4,10 +4,10 @@ package body Except is
    type Except is new Scripted_Testing.Command with null record;
    overriding
    function Tcl_Command
-     (C      : access Except;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
+     (C      : not null access Except;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
    type Except_Event is new Scripted_Testing.Event with record
       Str : Ada.Strings.Unbounded.Unbounded_String;
@@ -16,10 +16,10 @@ package body Except is
    procedure Execute (E : Except_Event);
 
    function Tcl_Command
-     (C      : access Except;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
+     (C      : not null access Except;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
       pragma Unreferenced (C);
       Str : Ada.Strings.Unbounded.Unbounded_String;

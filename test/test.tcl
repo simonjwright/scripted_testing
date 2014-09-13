@@ -146,10 +146,6 @@ if [catch {go} msg] {
         exit 1
     }
 } else {
-    puts "'wait_from_mark will_fail 0.55' should have failed"
+    puts "'wait_from_mark will_fail 0.25' should have failed"
     exit 1
 }
-
-wait 0.5
-wait_from_mark will_fail 0.25
-go

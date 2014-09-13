@@ -4,20 +4,20 @@ package body Lists is
    type Lists is new Scripted_Testing.Command with null record;
    overriding
    function Tcl_Command
-     (C      : access Lists;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
+     (C      : not null access Lists;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
    type Lists_Event is new Scripted_Testing.Event with null record;
    overriding
    procedure Execute (E : Lists_Event);
 
    function Tcl_Command
-     (C      : access Lists;
-      Interp :        Tcl.Tcl_Interp;
-      Argc   :        Interfaces.C.int;
-      Argv   :        CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
+     (C      : not null access Lists;
+      Interp : not null        Tcl.Tcl_Interp;
+      Argc   :                 Interfaces.C.int;
+      Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
    is
       pragma Unreferenced (C);
       use type Interfaces.C.int;
