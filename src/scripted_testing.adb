@@ -40,7 +40,7 @@ package body Scripted_Testing is
    --
    --  Don't worry about deallocating the Commands at program exit.
    package Command_Maps is new Ada.Containers.Indefinite_Ordered_Maps
-     (Key_Type => String,
+     (Key_Type     => String,
       Element_Type => Command_P);
 
    Commands : Command_Maps.Map;
@@ -154,15 +154,15 @@ package body Scripted_Testing is
    --  E v e n t   p r o c e s s i n g  --
    ---------------------------------------
 
-   package Event_Vectors is new Ada.Containers.Indefinite_Vectors
-     (Index_Type => Positive,
-      Element_Type => Event'Class);
+   package Action_Vectors is new Ada.Containers.Indefinite_Vectors
+     (Index_Type   => Positive,
+      Element_Type => Action'Class);
 
-   Queue : Event_Vectors.Vector;
+   Queue : Action_Vectors.Vector;
 
-   function Source_Line (E : Event) return String
+   function Source_Line (A : Action) return String
    is
-      Result : constant String := +E.Source;
+      Result : constant String := +A.Source;
    begin
       if Result'Length > 0 then
          return Result;
@@ -172,10 +172,10 @@ package body Scripted_Testing is
    end Source_Line;
 
 
-   procedure Post (The_Event :          Event'Class;
-                   Interp    : not null Tcl.Tcl_Interp)
+   procedure Post (The_Action : Action'Class;
+                   Interp     : not null Tcl.Tcl_Interp)
    is
-      Copy : Event'Class := The_Event;
+      Copy : Action'Class := The_Action;
       --  There seems to be no way to invoke the 'info' command
       --  programmatically, so we evaluate the Tcl version.
       --
@@ -229,12 +229,12 @@ package body Scripted_Testing is
       Argc   :                 Interfaces.C.int;
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
-   type Echo_Event is new Event with record
+   type Echo_Action is new Action with record
       Text : Ada.Strings.Unbounded.Unbounded_String;
    end record;
 
    overriding
-   procedure Execute (E : Echo_Event);
+   procedure Execute (E : Echo_Action);
 
    function Tcl_Command
      (C      : not null access Echo_Command;
@@ -249,8 +249,8 @@ package body Scripted_Testing is
          Tcl.Ada.Tcl_SetResult (Interp, "'echo' requires 1 argument");
          return Tcl.TCL_ERROR;
       end if;
-      Post (Echo_Event'(Event
-                        with Text => +CArgv.Arg (Argv, 1)),
+      Post (Echo_Action'(Action
+                         with Text => +CArgv.Arg (Argv, 1)),
             Interp => Interp);
       return Tcl.TCL_OK;
    exception
@@ -259,7 +259,7 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   procedure Execute (E : Echo_Event)
+   procedure Execute (E : Echo_Action)
    is
    begin
       Put_Line (Standard_Error, "echo: " & (+E.Text));
@@ -297,12 +297,12 @@ package body Scripted_Testing is
       loop
          exit when Queue.Length = 0;
          declare
-            E : constant Event'Class := Queue.First_Element;
+            E : constant Action'Class := Queue.First_Element;
          begin
             Queue.Delete_First;
             E.Execute;
          exception
-            --  On error, we clear the extant events and marks, not
+            --  On error, we clear the extant actions and marks, not
             --   because a normal script would need this (we recommend
             --   a single 'go' per script, which _should_ run to
             --   completion) but to make testing the basic commands
@@ -341,12 +341,12 @@ package body Scripted_Testing is
       Argc   :                 Interfaces.C.int;
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
-   type Mark_Event is new Event with record
+   type Mark_Action is new Action with record
       Name : Ada.Strings.Unbounded.Unbounded_String;
    end record;
 
    overriding
-   procedure Execute (E : Mark_Event);
+   procedure Execute (A : Mark_Action);
 
    function Tcl_Command
      (C      : not null access Mark_Command;
@@ -361,8 +361,8 @@ package body Scripted_Testing is
          Tcl.Ada.Tcl_SetResult (Interp, "'mark' requires 1 argument");
          return Tcl.TCL_ERROR;
       end if;
-      Post (Mark_Event'(Event
-                        with Name => +CArgv.Arg (Argv, 1)),
+      Post (Mark_Action'(Action
+                         with Name => +CArgv.Arg (Argv, 1)),
             Interp => Interp);
       return Tcl.TCL_OK;
    exception
@@ -371,9 +371,9 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   procedure Execute (E : Mark_Event)
+   procedure Execute (A : Mark_Action)
    is
-      Name : constant String := +E.Name;
+      Name : constant String := +A.Name;
    begin
       if Marks.Contains (Name) then
          Put_Line (Standard_Error, "mark '" & Name & "' already set");
@@ -397,12 +397,12 @@ package body Scripted_Testing is
       Argc   :                 Interfaces.C.int;
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
-   type Wait_Event is new Event with record
+   type Wait_Action is new Action with record
       Period : Duration;
    end record;
 
    overriding
-   procedure Execute (E : Wait_Event);
+   procedure Execute (A : Wait_Action);
 
    function Tcl_Command
      (C      : not null access Wait_Command;
@@ -417,8 +417,8 @@ package body Scripted_Testing is
          Tcl.Ada.Tcl_SetResult (Interp, "'wait' requires 1 argument");
          return Tcl.TCL_ERROR;
       end if;
-      Post (Wait_Event'(Event
-                        with Period => Duration'Value (CArgv.Arg (Argv, 1))),
+      Post (Wait_Action'(Action
+                         with Period => Duration'Value (CArgv.Arg (Argv, 1))),
             Interp => Interp);
       return Tcl.TCL_OK;
    exception
@@ -427,10 +427,10 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   procedure Execute (E : Wait_Event)
+   procedure Execute (A : Wait_Action)
    is
    begin
-      delay E.Period;
+      delay A.Period;
    end Execute;
 
    Wait : aliased Wait_Command;
@@ -447,13 +447,13 @@ package body Scripted_Testing is
       Argc   :                 Interfaces.C.int;
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
-   type Wait_From_Mark_Event is new Event with record
+   type Wait_From_Mark_Action is new Action with record
       Name   : Ada.Strings.Unbounded.Unbounded_String;
       Period : Duration;
    end record;
 
    overriding
-   procedure Execute (E : Wait_From_Mark_Event);
+   procedure Execute (A : Wait_From_Mark_Action);
 
    function Tcl_Command
      (C      : not null access Wait_From_Mark_Command;
@@ -470,8 +470,8 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
       end if;
       Post
-        (Wait_From_Mark_Event'
-           (Event with
+        (Wait_From_Mark_Action'
+           (Action with
             Name => +(CArgv.Arg (Argv, 1)),
             Period => Duration'Value (CArgv.Arg (Argv, 2))),
          Interp => Interp);
@@ -482,9 +482,9 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   procedure Execute (E : Wait_From_Mark_Event)
+   procedure Execute (A : Wait_From_Mark_Action)
    is
-      Name     : constant String  := +E.Name;
+      Name     : constant String  := +A.Name;
       Position : constant Mark_Maps.Cursor := Marks.Find (Name);
       use type Mark_Maps.Cursor;
    begin
@@ -495,7 +495,7 @@ package body Scripted_Testing is
          use type Ada.Calendar.Time;
          Now : constant Ada.Calendar.Time := Ada.Calendar.Clock;
          End_Of_Wait : constant Ada.Calendar.Time
-           := Mark_Maps.Element (Position) + E.Period;
+           := Mark_Maps.Element (Position) + A.Period;
       begin
          if End_Of_Wait < Now then
             raise Execution_Failure

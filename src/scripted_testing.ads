@@ -87,38 +87,38 @@ package Scripted_Testing is
                        To_Be_Named :          String);
 
    --  The Commands that are called by a test script create matching
-   --  Events which are posted to an internal event queue; the 'go'
+   --  Actions which are posted to an internal action queue; the 'go'
    --  command (which should be the last in the test script), instead
-   --  of posting an event, starts the queue.
+   --  of posting an action, starts the queue.
    --
-   --  The initial set of events would normally correspond to setup,
+   --  The initial set of actions would normally correspond to setup,
    --  for example arranging for stubbed lower-level interface calls
    --  to return appropriate values.
    --
    --  Once setup is complete, the software under test can start; how
    --  this is done depends on the framework in use. For example, with
    --  ColdFrame, the Dispatcher would be started.
-   type Event is abstract tagged private;
+   type Action is abstract tagged private;
 
-   --  Events are picked off the queue and Execute is called for each,
+   --  Actions are picked off the queue and Execute is called for each,
    --  until either the end of the queue is reached (which would
    --  indicate that the test script succeeded) or execution raises
    --  an exception.
    not overriding
-   procedure Execute (E : Event) is abstract;
+   procedure Execute (A : Action) is abstract;
 
    --  Used to report a script failure (for example, attempting to
    --  wait for a mark that hasn't been set). Any exception message is
    --  reported.
    Execution_Failure : exception;
 
-   --  The scriptfile:line at which the event was created.
+   --  The scriptfile:line at which the action was created.
    not overriding
-   function Source_Line (E : Event) return String;
+   function Source_Line (A : Action) return String;
 
-   --  Used by Commands to post their corresponding Event.
-   procedure Post (The_Event :          Event'Class;
-                   Interp    : not null Tcl.Tcl_Interp);
+   --  Used by Commands to post their corresponding Action.
+   procedure Post (The_Action : Action'Class;
+                   Interp     : not null Tcl.Tcl_Interp);
 
    --  Begin Tcl processing (and read the test script). Doesn't return
    --  (so all Commands must have been Registered before Start is
@@ -129,7 +129,7 @@ private
 
    type Command is abstract tagged limited null record;
 
-   type Event is abstract tagged record
+   type Action is abstract tagged record
       Source : Ada.Strings.Unbounded.Unbounded_String;
    end record;
 

@@ -80,15 +80,15 @@ meet the above requirements.
 
 <h2>Description</h2>
 
-<p>The components of the package are <i>Commands</i>, <i>Events</i>,
-and an <i>Event Queue</i>.
+<p>The components of the package are <i>Commands</i>, <i>Actions</i>,
+and an <i>Action Queue</i>.
 
 <h3>Commands</h3>
 
 <p>A Command implements a Tcl command.
 
-<p>It creates an Event to be executed at run time, and posts it on the
-Event Queue.
+<p>It creates an Action to be executed at run time, and posts it on
+the Action Queue.
 
 <p><a href="#provided-commands">Some commands</a> are provided by this
 package. Other commands are to be provided to support the specific
@@ -107,9 +107,10 @@ during elaboration of the package in which the Command is defined
 (see <tt>test/test-first.adb</tt> in the distribution); <tt>Start</tt>
 completes the registration with the Tcl interpreter.
 
-<h3>Events</h3>
+<h3>Actions</h3>
 
-<p>An Event carries the data required to enact the command at run time.
+<p>An Action carries the data required to enact the command at run
+time.
 
 <p>When it is executed, it performs the required action.
 
@@ -124,13 +125,13 @@ completes the registration with the Tcl interpreter.
 
 </ul>
 
-<h3>Event Queue</h3>
+<h3>Action Queue</h3>
 
-<p>When the Event Queue is started (using the <tt>go</tt> command), it
-repeatedly picks the next Event and executes it, until either the end
-of the queue is reached (which implies that the script has succeeded)
-or an exception is propagated (which implies that the script has
-failed).
+<p>When the Action Queue is started (using the <tt>go</tt> command),
+it repeatedly picks the next Action and executes it, until either the
+end of the queue is reached (which implies that the script has
+succeeded) or an exception is propagated (which implies that the
+script has failed).
 
 <a name="provided-commands"><h2>Provided commands</h2></a>
 

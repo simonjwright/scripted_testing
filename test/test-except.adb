@@ -9,11 +9,11 @@ package body Except is
       Argc   :                 Interfaces.C.int;
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
-   type Except_Event is new Scripted_Testing.Event with record
+   type Except_Action is new Scripted_Testing.Action with record
       Str : Ada.Strings.Unbounded.Unbounded_String;
    end record;
    overriding
-   procedure Execute (E : Except_Event);
+   procedure Execute (A : Except_Action);
 
    function Tcl_Command
      (C      : not null access Except;
@@ -34,17 +34,17 @@ package body Except is
          end if;
       end loop;
       Scripted_Testing.Post
-        (Except_Event'(Scripted_Testing.Event with
-                       Str => Str),
+        (Except_Action'(Scripted_Testing.Action with
+                        Str => Str),
          Interp => Interp);
       return Tcl.TCL_OK;
    end Tcl_Command;
 
-   procedure Execute (E : Except_Event)
+   procedure Execute (A : Except_Action)
    is
    begin
-      Put_Line ("except called at " & E.Source_Line);
-      raise Constraint_Error with +E.Str;
+      Put_Line ("except called at " & A.Source_Line);
+      raise Constraint_Error with +A.Str;
    end Execute;
 
    The_Except_Command : aliased Except;

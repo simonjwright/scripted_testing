@@ -9,9 +9,9 @@ package body First is
       Argc   :                 Interfaces.C.int;
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
-   type First_Event is new Scripted_Testing.Event with null record;
+   type First_Action is new Scripted_Testing.Action with null record;
    overriding
-   procedure Execute (E : First_Event);
+   procedure Execute (A : First_Action);
 
    function Tcl_Command
      (C      : not null access First;
@@ -27,16 +27,16 @@ package body First is
          Put_Line ("arg" & J'Img & " " & CArgv.Arg (Argv, J));
       end loop;
       Scripted_Testing.Post
-        (First_Event'(Scripted_Testing.Event with
-                      null record),
+        (First_Action'(Scripted_Testing.Action with
+                       null record),
          Interp => Interp);
       return Tcl.TCL_OK;
    end Tcl_Command;
 
-   procedure Execute (E : First_Event)
+   procedure Execute (A : First_Action)
    is
    begin
-      Put_Line ("first called at " & E.Source_Line);
+      Put_Line ("first called at " & A.Source_Line);
    end Execute;
 
    The_First_Command : aliased First;

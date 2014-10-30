@@ -9,9 +9,9 @@ package body Lists is
       Argc   :                 Interfaces.C.int;
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
-   type Lists_Event is new Scripted_Testing.Event with null record;
+   type Lists_Action is new Scripted_Testing.Action with null record;
    overriding
-   procedure Execute (E : Lists_Event);
+   procedure Execute (A : Lists_Action);
 
    function Tcl_Command
      (C      : not null access Lists;
@@ -45,16 +45,16 @@ package body Lists is
          end;
       end loop;
       --  Scripted_Testing.Post
-      --    (Lists_Event'(Scripted_Testing.Event with
+      --    (Lists_Action'(Scripted_Testing.Action with
       --                   Str => Str),
       --     Interp => Interp);
       return Tcl.TCL_OK;
    end Tcl_Command;
 
-   procedure Execute (E : Lists_Event)
+   procedure Execute (A : Lists_Action)
    is
    begin
-      Put_Line ("lists called at " & E.Source_Line);
+      Put_Line ("lists called at " & A.Source_Line);
    end Execute;
 
    The_Lists_Command : aliased Lists;
