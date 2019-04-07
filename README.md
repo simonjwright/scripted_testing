@@ -1,6 +1,6 @@
-#Scripted Testing
+# Scripted Testing
 
-##Introduction
+## Introduction
 
 To set the scene, the Ada software under test (SUT) forms part of a
 system. Generally, the system will be constructed using a layered
@@ -61,7 +61,7 @@ requirements.
 The components of the package are _Commands_, _Actions_, and an
 _Action Queue_.
 
-###Commands
+### Commands
 
 A Command implements a Tcl command.
 
@@ -85,7 +85,7 @@ during elaboration of the package in which the Command is defined
 (see `test/test-first.adb`)
 completes the registration with the Tcl interpreter.
 
-###Actions
+### Actions
 
 An Action carries the data required to enact the command at run
 time.
@@ -99,7 +99,7 @@ When it is executed, it performs the required action.
 
 * Any other exceptions are propagated.
 
-###Action Queue
+### Action Queue
 
 When the Action Queue is started (using the `go` command),
 it repeatedly picks the next Action and executes it, until either the
@@ -131,7 +131,7 @@ re-used.
 
 </dl>
 
-##Building
+## Building
 
 A [GNAT Project](http://docs.adacore.com/gprbuild-docs/html/gprbuild_ug.html)
 (GPR) file) is provided. To build the library, say
