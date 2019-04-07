@@ -1,7 +1,0 @@
-syntax: glob
-
-lib
-.build
-*-stamp
-
-test/test-main{,.exe}
