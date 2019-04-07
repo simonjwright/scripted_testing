@@ -18,8 +18,7 @@ tends to be fragile, requiring a lot of rework for even minor
 functional changes in the requirements.
 
 The scripting language supported is [Tcl](http://www.tcl.tk), and
-specifically the Ada
-binding
+specifically the Ada binding
 [TclAdaShell](http://sourceforge.net/projects/tcladashell/). The
 reason for choosing Tcl rather than Python or Lua is that Tcl's
 interface is entirely string-based; this is important, considering the
@@ -56,7 +55,7 @@ The
 [ColdFrame](https://github.com/simonjwright/coldframe) meet the above
 requirements.
 
-##Description
+## Description
 
 The components of the package are _Commands_, _Actions_, and an
 _Action Queue_.
@@ -82,8 +81,7 @@ Commands have to be `Register`ed with this package, because
 once Tcl has been started (using `Start`, which doesn't return)
 no more Commands can be added. Registration would normally be done
 during elaboration of the package in which the Command is defined
-(see `test/test-first.adb`)
-completes the registration with the Tcl interpreter.
+(see `test/test-first.adb`).
 
 ### Actions
 
