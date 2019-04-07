@@ -23,7 +23,7 @@ binding
 [TclAdaShell](http://sourceforge.net/projects/tcladashell/). The
 reason for choosing Tcl rather than Python or Lua is that Tcl's
 interface is entirely string-based; this is important, considering the
-need to specifiy values of enumerated types.
+need to specify values of enumerated types.
 
 The package provides facilities to write new commands in Tcl to
 
@@ -107,7 +107,7 @@ end of the queue is reached (which implies that the script has
 succeeded) or an exception is propagated (which implies that the
 script has failed).
 
-##<a name="provided-commands">Provided commands</a>
+## <a name="provided-commands">Provided commands</a>
 
 The commands provided by this package are
 
