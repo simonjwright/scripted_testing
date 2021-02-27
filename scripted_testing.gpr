@@ -29,7 +29,6 @@ library project Scripted_Testing is
         (
          "-O2",      --  standard optimisation
          "-g",       --  for debug symbols
-         "-gnat05",
          "-gnatq",   --  try semantics even if parse errors
          "-gnatQ",   --  to keep ALI files even if there are compilation errors
          "-gnatafo", --  assertions, full reports, integer overflow
