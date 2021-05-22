@@ -13,10 +13,12 @@
 --  the license.
 
 with Ada.Calendar;
+with Ada.Command_Line;
 with Ada.Containers.Indefinite_Ordered_Maps;
 with Ada.Containers.Indefinite_Vectors;
 with Ada.Exceptions;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;
+with Synchronized_Output;
 with Tcl.Ada;
 
 package body Scripted_Testing is
@@ -71,16 +73,33 @@ package body Scripted_Testing is
 
    procedure Start
    is
-      --  Argc and Argv include the command name
-      Argc : Interfaces.C.int;
-      Argv : CArgv.Chars_Ptr_Ptr;
-   begin
-      --  Get command-line arguments and put them into C-style "argv",
-      --  as required by Tcl_Main.
-      CArgv.Create (Argc, Argv);
+      Interp : constant Tcl.Tcl_Interp := Tcl.Tcl_CreateInterp;
+      Status : Interfaces.C.int;
 
-      --  Start Tcl (and never return!)
-      Tcl.Tcl_Main (Argc, Argv, Init'Access);
+      use type Interfaces.C.int;
+   begin
+      if Ada.Command_Line.Argument_Count /= 1 then
+         Ada.Text_IO.Put_Line
+           (Ada.Text_IO.Standard_Error, "must have one argument");
+         Synchronized_Output.Finalize;
+         return;
+      end if;
+
+      Status := Init (Interp);
+
+      if Status /= Tcl.TCL_OK then
+         raise Program_Error with "interpreter initialisation failed";
+      end if;
+
+      Status := Tcl.Ada.Tcl_EvalFile (Interp, Ada.Command_Line.Argument (1));
+
+      if Status /= Tcl.TCL_OK then
+         Synchronized_Output.Put_Line (Tcl.Ada.Tcl_GetResult (Interp));
+         Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
+      end if;
+
+      Synchronized_Output.Finalize;
+
    end Start;
 
    function Init (Interp : in Tcl.Tcl_Interp) return Interfaces.C.int
@@ -176,27 +195,8 @@ package body Scripted_Testing is
                    Interp     : not null Tcl.Tcl_Interp)
    is
       Copy : Action'Class := The_Action;
-      --  There seems to be no way to invoke the 'info' command
-      --  programmatically, so we evaluate the Tcl version.
-      --
-      --  The reason for the 'catch' is that 'info frame -1' fails if
-      --  the command is executed from the Tcl command line, rather
-      --  than a script, and the 'dict get $inf file' call finds no
-      --  'file' key. We have to use 'info frame -3' because of the
-      --  extra stack frames used by the 'if/catch' construct.
-      --
-      --  You might think this is overkill for a feature (invocation
-      --  from the command line) that will hardly ever be used.
-      Script : constant String :=
-        "if {![catch {info frame -3} inf]} "
-        & "{return ""[file tail [dict get $inf file]]:[dict get $inf line]""}";
-      Source_Line_Status : constant Interfaces.C.int
-        := Tcl.Ada.Tcl_Eval (Interp, Script);
-      use type Interfaces.C.int;
    begin
-      if Source_Line_Status = Tcl.TCL_RETURN then
-         Copy.Source := +Tcl.Ada.Tcl_GetStringResult (Interp);
-      end if;
+      Copy.Source := +Current_Source_Line (Interp);
       Queue.Append (Copy);
    end Post;
 
@@ -246,7 +246,11 @@ package body Scripted_Testing is
       use type Interfaces.C.int;
    begin
       if Argc /= 2 then
-         Tcl.Ada.Tcl_SetResult (Interp, "'echo' requires 1 argument");
+         Tcl.Ada.Tcl_SetResult
+           (Interp,
+            Current_Source_Line (Interp)
+              & ": "
+              & "'echo' requires 1 argument");
          return Tcl.TCL_ERROR;
       end if;
       Post (Echo_Action'(Action
@@ -255,14 +259,14 @@ package body Scripted_Testing is
       return Tcl.TCL_OK;
    exception
       when E : others =>
-         Put (Standard_Error, Ada.Exceptions.Exception_Message (E));
+         Synchronized_Output.Put_Line (Ada.Exceptions.Exception_Message (E));
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
    procedure Execute (E : Echo_Action)
    is
    begin
-      Put_Line (Standard_Error, "echo: " & (+E.Text));
+      Synchronized_Output.Put_Line ("echo: " & (+E.Text));
    end Execute;
 
    Echo : aliased Echo_Command;
@@ -290,7 +294,11 @@ package body Scripted_Testing is
       use type Ada.Containers.Count_Type;
    begin
       if Argc /= 1 then
-         Tcl.Ada.Tcl_SetResult (Interp, "'go' requires zero arguments");
+         Tcl.Ada.Tcl_SetResult
+           (Interp,
+            Current_Source_Line (Interp)
+              & ": "
+              & "'go' requires zero arguments");
          return Tcl.TCL_ERROR;
       end if;
 
@@ -358,7 +366,11 @@ package body Scripted_Testing is
       use type Interfaces.C.int;
    begin
       if Argc /= 2 then
-         Tcl.Ada.Tcl_SetResult (Interp, "'mark' requires 1 argument");
+         Tcl.Ada.Tcl_SetResult
+           (Interp,
+            Current_Source_Line (Interp)
+              & ": "
+              & "'mark' requires 1 argument");
          return Tcl.TCL_ERROR;
       end if;
       Post (Mark_Action'(Action
@@ -367,7 +379,7 @@ package body Scripted_Testing is
       return Tcl.TCL_OK;
    exception
       when E : others =>
-         Put (Standard_Error, Ada.Exceptions.Exception_Message (E));
+         Synchronized_Output.Put_Line (Ada.Exceptions.Exception_Message (E));
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
@@ -376,7 +388,7 @@ package body Scripted_Testing is
       Name : constant String := +A.Name;
    begin
       if Marks.Contains (Name) then
-         Put_Line (Standard_Error, "mark '" & Name & "' already set");
+         Synchronized_Output.Put_Line ("mark '" & Name & "' already set");
          Marks.Replace (Key => Name, New_Item => Ada.Calendar.Clock);
       else
          Marks.Insert (Key => Name, New_Item => Ada.Calendar.Clock);
@@ -414,7 +426,11 @@ package body Scripted_Testing is
       use type Interfaces.C.int;
    begin
       if Argc /= 2 then
-         Tcl.Ada.Tcl_SetResult (Interp, "'wait' requires 1 argument");
+         Tcl.Ada.Tcl_SetResult
+           (Interp,
+            Current_Source_Line (Interp)
+              & ": "
+              & "'wait' requires 1 argument");
          return Tcl.TCL_ERROR;
       end if;
       Post (Wait_Action'(Action
@@ -423,7 +439,11 @@ package body Scripted_Testing is
       return Tcl.TCL_OK;
    exception
       when E : others =>
-         Tcl.Ada.Tcl_SetResult (Interp, Ada.Exceptions.Exception_Message (E));
+         Tcl.Ada.Tcl_SetResult
+           (Interp,
+            Current_Source_Line (Interp)
+              & ": "
+              & Ada.Exceptions.Exception_Message (E));
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
@@ -466,7 +486,10 @@ package body Scripted_Testing is
    begin
       if Argc /= 3 then
          Tcl.Ada.Tcl_SetResult
-           (Interp, "'wait_from_mark' requires 2 arguments");
+           (Interp,
+            Current_Source_Line (Interp)
+              & ": "
+              & "'wait_from_mark' requires 2 arguments");
          return Tcl.TCL_ERROR;
       end if;
       Post
@@ -478,7 +501,11 @@ package body Scripted_Testing is
       return Tcl.TCL_OK;
    exception
       when E : others =>
-         Tcl.Ada.Tcl_SetResult (Interp, Ada.Exceptions.Exception_Message (E));
+         Tcl.Ada.Tcl_SetResult
+           (Interp,
+            Current_Source_Line (Interp)
+              & ": "
+              & Ada.Exceptions.Exception_Message (E));
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
@@ -511,6 +538,38 @@ package body Scripted_Testing is
    end Execute;
 
    Wait_From_Mark : aliased Wait_From_Mark_Command;
+
+
+   -------------------------
+   --  U t i l i t i e s  --
+   -------------------------
+
+   function Current_Source_Line (Interp : in Tcl.Tcl_Interp) return String
+   is
+      --  There seems to be no way to invoke the 'info' command
+      --  programmatically, so we evaluate the Tcl version.
+      --
+      --  The reason for the 'catch' is that 'info frame -1' fails if
+      --  the command is executed from the Tcl command line, rather
+      --  than a script, and the 'dict get $inf file' call finds no
+      --  'file' key. We have to use 'info frame -3' because of the
+      --  extra stack frames used by the 'if/catch' construct.
+      --
+      --  You might think this is overkill for a feature (invocation
+      --  from the command line) that will hardly ever be used.
+      Script : constant String :=
+        "if {![catch {info frame -3} inf]} "
+        & "{return ""[file tail [dict get $inf file]]:[dict get $inf line]""}";
+      Source_Line_Status : constant Interfaces.C.int
+        := Tcl.Ada.Tcl_Eval (Interp, Script);
+      use type Interfaces.C.int;
+   begin
+      if Source_Line_Status = Tcl.TCL_RETURN then
+         return Tcl.Ada.Tcl_GetStringResult (Interp);
+      else
+         return "(unknown)";
+      end if;
+   end Current_Source_Line;
 
 
 begin

@@ -25,6 +25,8 @@ all::
 
 GPRBUILD ?= gprbuild
 
+include Makefile.paths
+
 all:: lib-static-stamp
 
 lib-static-stamp: scripted_testing.gpr
@@ -72,80 +74,9 @@ install-relocatable-lib: lib-relocatable-stamp
 
 clean:
 	-gnatclean -P scripted_testing.gpr -XLIBRARY_TYPE=static
-	#-gnatclean -P scripted_testing.gpr -XLIBRARY_TYPE=relocatable
+	-gnatclean -P scripted_testing.gpr -XLIBRARY_TYPE=relocatable
 	rm -f *-stamp
 .PHONY: clean
 
-# Docs
-
-DOCS = doc/index.html doc/sf.css
-RSYNC ?= rsync
-SFUSER ?= simonjwright
-
-upload-docs: $(DOCS) force
-	$(RSYNC)							\
-	  --compress							\
-	  --copy-unsafe-links						\
-	  --cvs-exclude							\
-	  --perms							\
-	  --recursive							\
-	  --rsh=ssh							\
-	  --times							\
-	  --update							\
-	  --verbose							\
-	  $(DOCS)							\
-	  $(SFUSER),coldframe@web.sourceforge.net:htdocs/scripted_testing
-
 .PHONY: force
 
-############################
-# Distribution construction
-
-# Create the current date, in the form yyyymmdd.
-SUBRELEASE = hg
-DATE = $(shell date +%Y%m%d)$(SUBRELEASE)
-
-DOCS =						\
-COPYING3					\
-doc/sf.css					\
-doc/index.html
-
-SRC =						\
-src/scripted_testing.adb			\
-src/scripted_testing.ads
-
-TEST =						\
-test/test.gpr					\
-test/test.tcl					\
-test/test.ads					\
-test/test.adb					\
-test/test-except.adb				\
-test/test-first.adb				\
-test/test-lists.adb				\
-test/test-main.adb
-
-BUILDING =					\
-Makefile					\
-scripted_testing.gpr
-
-DISTRIBUTION_FILES =				\
-scripted_testing-$(DATE).tgz			\
-scripted_testing-$(DATE).zip
-
-scripted_testing-$(DATE).tgz: scripted_testing-$(DATE)
-	-rm $@
-	tar zcvf $@ $</
-
-scripted_testing-$(DATE).zip: scripted_testing-$(DATE)
-	-rm $@
-	zip -r $@ $</*
-
-scripted_testing-$(DATE): $(DOCS) $(SRC) $(TEST) $(BUILDING)
-	-rm -rf $@
-	mkdir $@ $@/docs $@/src $@/test
-	cp -p $(DOCS) $@/docs/
-	cp -p $(SRC) $@/src/
-	cp -p $(TEST) $@/test/
-	cp -p $(BUILDING) $@
-
-dist:: $(DISTRIBUTION_FILES)

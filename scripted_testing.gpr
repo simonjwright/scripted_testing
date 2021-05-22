@@ -12,7 +12,9 @@
 --  If not, go to http://www.gnu.org/licenses for a complete copy of
 --  the license.
 
+with "synchronized_output";
 with "tash";
+
 library project Scripted_Testing is
 
    for Library_Name use "scripted_testing";

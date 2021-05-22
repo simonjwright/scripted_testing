@@ -82,6 +82,10 @@ package Scripted_Testing is
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int
      is abstract;
 
+   --  Can be used if it's necessary for a Tcl_Command to report
+   --  errors in the input.
+   function Current_Source_Line (Interp : in Tcl.Tcl_Interp) return String;
+
    --  A Command is to be registered with the Tcl interpreter.
    procedure Register (The_Command : not null Command_P;
                        To_Be_Named :          String);
@@ -98,6 +102,7 @@ package Scripted_Testing is
    --  Once setup is complete, the software under test can start; how
    --  this is done depends on the framework in use. For example, with
    --  ColdFrame, the Dispatcher would be started.
+
    type Action is abstract tagged private;
 
    --  Actions are picked off the queue and Execute is called for each,
