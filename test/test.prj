@@ -1,0 +1,4 @@
+$HOME=/Users/simon
+gpr_file=test.gpr
+casing=$HOME/.emacs_case_exceptions
+gpr_project_path=$HOME/tcladashell
