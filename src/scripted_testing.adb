@@ -458,8 +458,8 @@ package body Scripted_Testing is
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
    type Wait_From_Mark_Action is new Action with record
-      Name   : Ada.Strings.Unbounded.Unbounded_String;
-      Period : Duration;
+      Name     : Ada.Strings.Unbounded.Unbounded_String;
+      Interval : Duration;
    end record;
 
    overriding
@@ -486,8 +486,8 @@ package body Scripted_Testing is
       Post
         (Wait_From_Mark_Action'
            (Action with
-            Name => +(CArgv.Arg (Argv, 1)),
-            Period => Duration'Value (CArgv.Arg (Argv, 2))),
+            Name     => +(CArgv.Arg (Argv, 1)),
+            Interval => Duration'Value (CArgv.Arg (Argv, 2))),
          Interp => Interp);
       return Tcl.TCL_OK;
    exception
@@ -513,13 +513,15 @@ package body Scripted_Testing is
          use type Ada.Calendar.Time;
          Now : constant Ada.Calendar.Time := Ada.Calendar.Clock;
          End_Of_Wait : constant Ada.Calendar.Time
-           := Mark_Maps.Element (Position) + A.Period;
+           := Mark_Maps.Element (Position) + A.Interval;
       begin
          if End_Of_Wait < Now then
             raise Execution_Failure
-              with ("mark '"
+              with ("wait from mark '"
                       & Name
-                      & "' passed"
+                      & "'"
+                      & Duration'Image (A.Interval)
+                      & " passed"
                       & Duration'Image (Now - End_Of_Wait)
                       & " seconds ago");
          else
