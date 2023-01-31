@@ -15,15 +15,17 @@
 # along with this program; see the file COPYING3.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-include ../Makefile.paths
+all:: tests
 
-all:: test-main
+tests: test-main internal test timing
+
+%: %.tcl
+	./test-main $<
+
+internal: internal.tcl
+	-./test-main $<
 
 test-main: force
-	gprbuild test.gpr
+	alr build
 
-clean:
-	gprclean test.gpr
-	-rm ivp
-
-.PHONY: all clean force
+.PHONY: all tests force

@@ -1,2 +1,5 @@
+alire/
+config/
 lib*
-.build
+.build/
+.clang-format

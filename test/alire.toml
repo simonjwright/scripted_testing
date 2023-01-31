@@ -1,0 +1,15 @@
+name = "test"
+description = "Test for scripted_testing"
+version = "0.1.0-dev"
+
+authors = ["Simon Wright"]
+maintainers = ["Simon Wright <simon@pushface.org>"]
+maintainers-logins = ["simonjwright"]
+
+executables = ["test"]
+
+[[depends-on]]
+scripted_testing = "*"
+
+[[pins]]
+scripted_testing = { path = '..' }

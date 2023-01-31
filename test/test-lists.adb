@@ -44,10 +44,6 @@ package body Lists is
             end if;
          end;
       end loop;
-      --  Scripted_Testing.Post
-      --    (Lists_Action'(Scripted_Testing.Action with
-      --                   Str => Str),
-      --     Interp => Interp);
       return Tcl.TCL_OK;
    end Tcl_Command;
 

@@ -84,7 +84,7 @@ package Scripted_Testing is
 
    --  Can be used if it's necessary for a Tcl_Command to report
    --  errors in the input.
-   function Current_Source_Line (Interp : in Tcl.Tcl_Interp) return String;
+   function Current_Source_Line (Interp : Tcl.Tcl_Interp) return String;
 
    --  A Command is to be registered with the Tcl interpreter.
    procedure Register (The_Command : not null Command_P;

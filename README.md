@@ -4,9 +4,9 @@
 
 To set the scene, the Ada software under test (SUT) forms part of a system. Generally, the system will be constructed using a layered approach, and the other parts of the system that interact with the SUT are higher-level (which can call interface subprograms presented by the SUT) or lower-level (whose interfaces can be called by the SUT, or which can provide callbacks to the SUT).
 
-This package is intended for testing at a level between unit testing (using, for example, [AUnit](https://www.adacore.com/download) - go to the _More packages, platforms, versions and sources_ link at the bottom of the page, and then to the _Sources_ link at the bottom of that page) and integration testing (using real hardware). Unit testing tends to be fragile, requiring a lot of rework for even minor functional changes in the requirements.
+This package is intended for testing at a level between unit testing (using, for example, [AUnit](https://github.com/AdaCore/aunit)) and integration testing (using real hardware). Unit testing tends to be fragile, requiring a lot of rework for even minor functional changes in the requirements.
 
-The scripting language supported is [Tcl](http://www.tcl.tk), and specifically the Ada binding [TclAdaShell](http://sourceforge.net/projects/tcladashell/). The reason for choosing Tcl rather than Python or Lua is that Tcl's interface is entirely string-based; this is important, considering the need to specify values of enumerated types.
+The scripting language supported is [Tcl](http://www.tcl.tk), and specifically the Ada binding [Tash](https://github.com/simonjwright/tcladashell). The reason for choosing Tcl rather than Python or Lua is that Tcl's interface is entirely string-based; this is important, considering the need to specify values of enumerated types.
 
 The package provides facilities to write new commands in Tcl to
 
@@ -83,19 +83,4 @@ The commands provided by this package are
 
 ## Building
 
-A [GNAT Project](http://docs.adacore.com/gprbuild-docs/html/gprbuild_ug.html) (GPR) file) is provided. To build the library, say
-```
-gprbuild -p -P scripted_testing
-```
-To install at your compiler's standard place, say this (you may need to do so as `root`, via e.g. `sudo`). **DO NOT** do this if you're using the compiler supplied with Debian-based systems.
-```
-make install
-```
-
-To install in (for example) `~/local`, say
-```
-make install prefix=~/local
-```
-(and remember to put `~/local/lib/gnat` on your `ADA_PROJECT_PATH`).
-
-Your own GPR should then begin with `with "scripted_testing"`;
+This is an [Alire](https://alire.ada.dev/docs/#introduction) crate; to build, say `alr build`.

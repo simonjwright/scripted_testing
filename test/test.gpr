@@ -12,7 +12,9 @@
 --  If not, go to http://www.gnu.org/licenses for a complete copy of
 --  the license.
 
-with "../scripted_testing";
+with "scripted_testing";
+with "config/test_config";
+
 project Test is
 
    for Main use ("test-main.adb");
@@ -21,12 +23,9 @@ project Test is
 
    for Create_Missing_Dirs use "true";
 
-   package Builder is
-      for Default_Switches ("ada") use
-        (
-         "-g"        --  for debug symbols
-        );
-   end Builder;
+   package Compiler is
+      for Default_Switches ("ada") use Test_Config.Ada_Compiler_Switches;
+   end Compiler;
 
    package Binder is
       for Default_Switches ("ada") use ("-E");

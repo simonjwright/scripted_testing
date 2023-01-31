@@ -18,7 +18,6 @@ with Ada.Containers.Indefinite_Ordered_Maps;
 with Ada.Containers.Indefinite_Vectors;
 with Ada.Exceptions;
 with Ada.Text_IO;
-with Synchronized_Output;
 with Tcl.Ada;
 
 package body Scripted_Testing is
@@ -31,7 +30,6 @@ package body Scripted_Testing is
      renames Ada.Strings.Unbounded.To_Unbounded_String;
    function "+" (S : Ada.Strings.Unbounded.Unbounded_String) return String
      renames Ada.Strings.Unbounded.To_String;
-
 
    -------------------------------------------
    --  C o m m a n d   p r o c e s s i n g  --
@@ -47,7 +45,7 @@ package body Scripted_Testing is
 
    Commands : Command_Maps.Map;
 
-   function Init (Interp : in Tcl.Tcl_Interp) return Interfaces.C.int;
+   function Init (Interp : Tcl.Tcl_Interp) return Interfaces.C.int;
    pragma Convention (C, Init);
 
    --  This is the Tcl_CmdProc that is invoked for all Commands. The
@@ -81,7 +79,6 @@ package body Scripted_Testing is
       if Ada.Command_Line.Argument_Count /= 1 then
          Ada.Text_IO.Put_Line
            (Ada.Text_IO.Standard_Error, "must have one argument");
-         Synchronized_Output.Finalize;
          return;
       end if;
 
@@ -94,15 +91,12 @@ package body Scripted_Testing is
       Status := Tcl.Ada.Tcl_EvalFile (Interp, Ada.Command_Line.Argument (1));
 
       if Status /= Tcl.TCL_OK then
-         Synchronized_Output.Put_Line (Tcl.Ada.Tcl_GetResult (Interp));
+         Ada.Text_IO.Put_Line (Tcl.Ada.Tcl_GetResult (Interp));
          Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
       end if;
-
-      Synchronized_Output.Finalize;
-
    end Start;
 
-   function Init (Interp : in Tcl.Tcl_Interp) return Interfaces.C.int
+   function Init (Interp : Tcl.Tcl_Interp) return Interfaces.C.int
    is
       procedure Create_Command (Position : Command_Maps.Cursor);
       procedure Create_Command (Position : Command_Maps.Cursor)
@@ -168,7 +162,6 @@ package body Scripted_Testing is
       return Cmd.Tcl_Command (Interp, Argc, Argv);
    end Classwide_Tcl_Command;
 
-
    ---------------------------------------
    --  E v e n t   p r o c e s s i n g  --
    ---------------------------------------
@@ -190,7 +183,6 @@ package body Scripted_Testing is
       end if;
    end Source_Line;
 
-
    procedure Post (The_Action : Action'Class;
                    Interp     : not null Tcl.Tcl_Interp)
    is
@@ -199,7 +191,6 @@ package body Scripted_Testing is
       Copy.Source := +Current_Source_Line (Interp);
       Queue.Append (Copy);
    end Post;
-
 
    -------------------------------
    --  T i m e   m a r k i n g  --
@@ -212,7 +203,6 @@ package body Scripted_Testing is
       "="          => Ada.Calendar."=");
 
    Marks : Mark_Maps.Map;
-
 
    -----------------------------------
    --  B a s i c   c o m m a n d s  --
@@ -236,6 +226,7 @@ package body Scripted_Testing is
    overriding
    procedure Execute (E : Echo_Action);
 
+   overriding
    function Tcl_Command
      (C      : not null access Echo_Command;
       Interp : not null        Tcl.Tcl_Interp;
@@ -259,18 +250,17 @@ package body Scripted_Testing is
       return Tcl.TCL_OK;
    exception
       when E : others =>
-         Synchronized_Output.Put_Line (Ada.Exceptions.Exception_Message (E));
+         Ada.Text_IO.Put_Line (Ada.Exceptions.Exception_Message (E));
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   procedure Execute (E : Echo_Action)
+   overriding procedure Execute (E : Echo_Action)
    is
    begin
-      Synchronized_Output.Put_Line ("echo: " & (+E.Text));
+      Ada.Text_IO.Put_Line ("echo: " & (+E.Text));
    end Execute;
 
    Echo : aliased Echo_Command;
-
 
    --  go  --
 
@@ -283,6 +273,7 @@ package body Scripted_Testing is
       Argc   :                 Interfaces.C.int;
       Argv   :                 CArgv.Chars_Ptr_Ptr) return Interfaces.C.int;
 
+   overriding
    function Tcl_Command
      (C      : not null access Go_Command;
       Interp : not null        Tcl.Tcl_Interp;
@@ -337,7 +328,6 @@ package body Scripted_Testing is
 
    Go : aliased Go_Command;
 
-
    --  mark  --
 
    type Mark_Command is new Command with null record;
@@ -356,6 +346,7 @@ package body Scripted_Testing is
    overriding
    procedure Execute (A : Mark_Action);
 
+   overriding
    function Tcl_Command
      (C      : not null access Mark_Command;
       Interp : not null        Tcl.Tcl_Interp;
@@ -379,16 +370,16 @@ package body Scripted_Testing is
       return Tcl.TCL_OK;
    exception
       when E : others =>
-         Synchronized_Output.Put_Line (Ada.Exceptions.Exception_Message (E));
+         Ada.Text_IO.Put_Line (Ada.Exceptions.Exception_Message (E));
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   procedure Execute (A : Mark_Action)
+   overriding procedure Execute (A : Mark_Action)
    is
       Name : constant String := +A.Name;
    begin
       if Marks.Contains (Name) then
-         Synchronized_Output.Put_Line ("mark '" & Name & "' already set");
+         Ada.Text_IO.Put_Line ("mark '" & Name & "' already set");
          Marks.Replace (Key => Name, New_Item => Ada.Calendar.Clock);
       else
          Marks.Insert (Key => Name, New_Item => Ada.Calendar.Clock);
@@ -396,7 +387,6 @@ package body Scripted_Testing is
    end Execute;
 
    Mark : aliased Mark_Command;
-
 
    --  wait  --
 
@@ -416,6 +406,7 @@ package body Scripted_Testing is
    overriding
    procedure Execute (A : Wait_Action);
 
+   overriding
    function Tcl_Command
      (C      : not null access Wait_Command;
       Interp : not null        Tcl.Tcl_Interp;
@@ -447,14 +438,13 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   procedure Execute (A : Wait_Action)
+   overriding procedure Execute (A : Wait_Action)
    is
    begin
       delay A.Period;
    end Execute;
 
    Wait : aliased Wait_Command;
-
 
    --  wait_from_mark  --
 
@@ -475,6 +465,7 @@ package body Scripted_Testing is
    overriding
    procedure Execute (A : Wait_From_Mark_Action);
 
+   overriding
    function Tcl_Command
      (C      : not null access Wait_From_Mark_Command;
       Interp : not null        Tcl.Tcl_Interp;
@@ -509,7 +500,7 @@ package body Scripted_Testing is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
-   procedure Execute (A : Wait_From_Mark_Action)
+   overriding procedure Execute (A : Wait_From_Mark_Action)
    is
       Name     : constant String  := +A.Name;
       Position : constant Mark_Maps.Cursor := Marks.Find (Name);
@@ -539,12 +530,11 @@ package body Scripted_Testing is
 
    Wait_From_Mark : aliased Wait_From_Mark_Command;
 
-
    -------------------------
    --  U t i l i t i e s  --
    -------------------------
 
-   function Current_Source_Line (Interp : in Tcl.Tcl_Interp) return String
+   function Current_Source_Line (Interp : Tcl.Tcl_Interp) return String
    is
       --  There seems to be no way to invoke the 'info' command
       --  programmatically, so we evaluate the Tcl version.
@@ -570,7 +560,6 @@ package body Scripted_Testing is
          return "(unknown)";
       end if;
    end Current_Source_Line;
-
 
 begin
 
