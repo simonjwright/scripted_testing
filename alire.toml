@@ -29,6 +29,7 @@ It's assumed that the interface subprograms of the lower-level subsystems are st
 
 * the number of calls to the subprogram can be checked.
 """
+licenses = "GPL-3.0-or-later"
 website = "https://github.com/simonjwright/scripted_testing.git"
 tags = ["testing", "integration", "scripting"]
 version = "2.0.0"
