@@ -517,11 +517,10 @@ package body Scripted_Testing is
       begin
          if End_Of_Wait < Now then
             raise Execution_Failure
-              with ("wait from mark '"
+              with ("""wait_from_mark "
                       & Name
-                      & "'"
                       & Duration'Image (A.Interval)
-                      & " passed"
+                      & """ passed"
                       & Duration'Image (Now - End_Of_Wait)
                       & " seconds ago");
          else

@@ -141,7 +141,7 @@ wait 0.5
 wait_from_mark will_fail 0.25
 
 if [catch {go} msg] {
-    if ![ regexp {mark 'will_fail' passed} $msg] then {
+    if ![ regexp {mark will_fail \d+(.\d+)?\" passed} $msg] then {
         puts "unexpected result '$msg'"
         exit 1
     }
