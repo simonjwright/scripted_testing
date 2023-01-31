@@ -1,5 +1,5 @@
 name = "scripted_testing"
-description = "Shiny new project"
+description = "Integration testing"
 long-description = """
 To set the scene, the Ada software under test (SUT) forms part of a system. Generally, the system will be constructed using a layered approach, and the other parts of the system that interact with the SUT are higher-level (which can call interface subprograms presented by the SUT) or lower-level (whose interfaces can be called by the SUT, or which can provide callbacks to the SUT).
 
@@ -30,7 +30,8 @@ It's assumed that the interface subprograms of the lower-level subsystems are st
 * the number of calls to the subprogram can be checked.
 """
 website = "https://github.com/simonjwright/scripted_testing.git"
-version = "0.1.0-dev"
+tags = ["testing", "integration", "scripting"]
+version = "2.0.0"
 
 authors = ["Simon Wright"]
 maintainers = ["Simon Wright <simon@pushface.org>"]
