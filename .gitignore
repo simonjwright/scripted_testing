@@ -1,5 +1,5 @@
 alire/
 config/
-lib*
+lib/
 .build/
 .clang-format
