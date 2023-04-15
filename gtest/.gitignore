@@ -1,0 +1,4 @@
+gtest
+digital_io/digital_io-get.adb
+digital_io/digital_io-set.adb
+digital_io/digital_io.adb

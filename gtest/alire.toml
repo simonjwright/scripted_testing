@@ -1,0 +1,26 @@
+name = "gtest"
+description = "gtest"
+long-description = """
+Uses the generator (`../generator/`) to create stubbed subprograms for the interfacing package `digital_io/digital_io.ads`.
+Provides Tcl commands to interface with the stubbed subprograms.
+"""
+version = "0.0.1"
+
+licenses = "CC0-1.0"
+
+authors = ["Simon Wright"]
+maintainers = ["Simon Wright <simon@pushface.org>"]
+maintainers-logins = ["simonjwright"]
+
+# Build the stub implementations.
+[[actions]]
+type = "pre-build"
+command = ["make", "-C", "digital_io", "-f", "../../generator/Makefile.inc", "digital_io.adb"]
+
+[[depends-on]]
+scripted_testing = "*"
+#libadalang2xml = "*"
+
+[[pins]]
+scripted_testing = { path='..' }
+#libadalang2xml = { path='../../libadalang2xml' }
