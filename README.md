@@ -8,6 +8,14 @@ This package is intended for testing at a level between unit testing (using, for
 
 The scripting language supported is [Tcl](http://www.tcl.tk), and specifically the Ada binding [Tash](https://github.com/simonjwright/tcladashell). The reason for choosing Tcl rather than Python or Lua is that Tcl's interface is entirely string-based; this is important, considering the need to specify values of enumerated types.
 
+## Genesis
+
+The project from which this project is derived is the author's [ColdFrame](https://github.com/simonjwright/coldframe); see that project's [stubbing facilities](https://simonjwright.github.io/coldframe/stubs.html).
+
+ColdFrame is a code generation framework, and has its own approach to stubbing (mocking) subprograms. This package has a <a href="#stub-generation">different, but related, approach</a>.
+
+## Facilities
+
 The package provides facilities to write new commands in Tcl to
 
 * call the interface subprograms presented by the SUT,
@@ -29,10 +37,6 @@ It's assumed that the interface subprograms of the lower-level subsystems are st
 * exceptions can be raised when required,
 
 * the number of calls to the subprogram can be checked.
-
-The [stubbing facilities](https://simonjwright.github.io/coldframe/stubs.html) of [ColdFrame](https://github.com/simonjwright/coldframe) meet the above requirements.
-
-## Description
 
 The components of the package are _Commands_, _Actions_, and an _Action Queue_.
 
@@ -84,3 +88,7 @@ The commands provided by this package are
 ## Building
 
 This is an [Alire](https://alire.ada.dev/docs/#introduction) crate; to build, say `alr build`.
+
+## <a name="stub-generation">Stub generation</a>
+
+
