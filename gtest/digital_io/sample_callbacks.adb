@@ -5,9 +5,17 @@ with Ada.Containers.Vectors;
 
 package body Sample_Callbacks is
 
+   --  The Insert subprograms of Vectors insert uninitialised objects,
+   --  which in this case would be null, disallowed for Callback
+   --  objects.
+   --  Turn off this warning, since we only ever Append valid objects.
+   pragma Warnings (Off, "null-excluding objects must be initialized");
+
    package Callback_Vectors
    is new Ada.Containers.Vectors (Index_Type   => Positive,
                                   Element_Type => Callback);
+
+   pragma Warnings (On, "null-excluding objects must be initialized");
 
    Callbacks : Callback_Vectors.Vector;
 

@@ -5,6 +5,18 @@
   <!--
        Copyright (C) 2023 Simon Wright <simon@pushface.org>
        SPDX-License-Identifier: GPL-3.0-or-later
+
+       Given an XML file corresponding to an Ada spec, generate a
+       stubbed body. This is done as a package body, where each
+       (public) subprogram in the spec is generated as a body stub and
+       a separate body; this is done in case the stub needs
+       modification, for example to adjust the time of validity to
+       correspond to the time of execution, not the time at which the
+       script is processed.
+
+       NB, there's no attempt at proper formatting, or splitting into
+       appropriate compilation units; that's left to gnatpp and
+       gnatchop.
        -->
 
   <xsl:strip-space elements="*"/>
@@ -12,13 +24,20 @@
 
   <xsl:template match="PackageDecl">
     <xsl:variable name="package-name" select="DefiningName/Id"/>
+
+    <!-- Output the body -->
     with Scripted_Testing.Stubs;
     package body <xsl:value-of select="$package-name"/> is
+
+    <!-- Output the body stubs for public subprograms -->
     <xsl:apply-templates
       select="PublicPart//SubpSpec"
-      mode="stub">
+      mode="body-stub">
       <xsl:with-param name="package-name" select="$package-name"/>
     </xsl:apply-templates>
+
+    <!-- Output the package's handled-sequence-of-statements; register the
+         stubbed subprograms -->
     begin
     <xsl:apply-templates
       select="PublicPart//SubpSpec"
@@ -26,14 +45,16 @@
       <xsl:with-param name="package-name" select="$package-name"/>
     </xsl:apply-templates>
     end <xsl:value-of select="$package-name"/>;
+
+    <!-- Output the proper bodies -->
     <xsl:apply-templates
       select="PublicPart//SubpSpec"
-      mode="body">
+      mode="proper-body">
       <xsl:with-param name="package-name" select="$package-name"/>
     </xsl:apply-templates>
   </xsl:template>
 
-  <xsl:template match="SubpSpec[SubpKindFunction]" mode="stub">
+  <xsl:template match="SubpSpec[SubpKindFunction]" mode="body-stub">
     function <xsl:value-of select="DefiningName/Id"/>
     <xsl:apply-templates select="Params" mode="ada"/>
     return <xsl:value-of select="SubtypeIndication/Id"/> is separate;
@@ -54,7 +75,7 @@
     (&quot;<xsl:value-of select="$subp-name"/>&quot;, &quot;return&quot;);
   </xsl:template>
 
-  <xsl:template match="SubpSpec[SubpKindFunction]" mode="body">
+  <xsl:template match="SubpSpec[SubpKindFunction]" mode="proper-body">
     <xsl:param name="package-name"/>
     <xsl:variable name="name" select="DefiningName/Id"/>
     <xsl:variable name="subp-name" select="concat($package-name, '.', $name)"/>
@@ -77,7 +98,7 @@
     end <xsl:value-of select="$name"/>;
   </xsl:template>
 
-  <xsl:template match="SubpSpec[SubpKindProcedure]" mode="stub">
+  <xsl:template match="SubpSpec[SubpKindProcedure]" mode="body-stub">
     procedure <xsl:value-of select="DefiningName/Id"/>
       <xsl:apply-templates select="Params" mode="ada"/> is separate;
   </xsl:template>
@@ -95,7 +116,7 @@
     </xsl:apply-templates>
   </xsl:template>
 
-  <xsl:template match="SubpSpec[SubpKindProcedure]" mode="body">
+  <xsl:template match="SubpSpec[SubpKindProcedure]" mode="proper-body">
     <xsl:param name="package-name"/>
     <xsl:variable name="name" select="DefiningName/Id"/>
     <xsl:variable name="subp-name" select="concat($package-name, '.', $name)"/>
@@ -170,9 +191,9 @@
   <!-- Skip over leading pragmas, context. Why doesn't match="*" work? -->
   <xsl:template match="/CompilationUnit/AdaNodeList"/>
 
-  <xsl:template match="*" mode="stub"/>
+  <xsl:template match="*" mode="body-stub"/>
   <xsl:template match="*" mode="register"/>
-  <xsl:template match="*" mode="body"/>
+  <xsl:template match="*" mode="proper-body"/>
   <xsl:template match="*" mode="ada"/>
 
 </xsl:stylesheet>
