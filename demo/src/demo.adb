@@ -9,7 +9,7 @@ pragma Unreferenced (Digital_IO.Scripting);
 with Scripted_Testing;
 with GNAT.OS_Lib;
 
-procedure Gtest is
+procedure Demo is
 begin
    Scripted_Testing.Start;
    --  Returns on script completion (success or failure).
@@ -17,4 +17,4 @@ begin
    --  The SUT will very likely contain a task or tasks; this will
    --  ensure program exit regardless of their state.
    GNAT.OS_Lib.OS_Exit (0);
-end Gtest;
+end Demo;
