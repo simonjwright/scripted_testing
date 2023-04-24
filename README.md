@@ -91,4 +91,5 @@ This is an [Alire](https://alire.ada.dev/docs/#introduction) crate; to build, sa
 
 ## <a name="stub-generation">Stub generation</a>
 
+See a worked example in the [`demo/`](demo/) directory.
 
