@@ -3,6 +3,8 @@ description = "demo"
 long-description = """
 Uses the generator (`../generator/`) to create stubbed subprograms for the interfacing package `digital_io/digital_io.ads`.
 Provides Tcl commands to interface with the stubbed subprograms.
+
+**NB** uses [libadalang2xml](https://github.com/simonjwright/libadalang2xml); build this separately, and place the executable `libadalang2xml` on the `PATH`.
 """
 version = "2.1.0"
 
