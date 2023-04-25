@@ -34,6 +34,7 @@ package body Scripted_Testing.Callbacks is
    overriding
    procedure Execute (A : Callback_Action);
 
+   overriding
    function Tcl_Command
      (C      : not null access Callback_Command;
       Interp : not null        Tcl.Tcl_Interp;
@@ -63,10 +64,11 @@ package body Scripted_Testing.Callbacks is
          return Tcl.TCL_ERROR;
    end Tcl_Command;
 
+   overriding
    procedure Execute (A : Callback_Action)
    is
    begin
-      Application_Callbacks.Call_Callbacks (A.Data);
+      Call_Callbacks (A.Data);
    exception
       when Ex : others =>
          raise Scripted_Testing.Execution_Failure with

@@ -189,10 +189,10 @@ For `check-boolean-for-digital_io.output_signal`, we instantiate `Scripting.Chec
    is
       Tokens : GNAT.String_Split.Slice_Set;
    begin
-      GNAT.String_Split.Create (S => Tokens,
-                                From => S,
+      GNAT.String_Split.Create (S          => Tokens,
+                                From       => S,
                                 Separators => " " & ASCII.HT,
-                                Mode => GNAT.String_Split.Multiple);
+                                Mode       => GNAT.String_Split.Multiple);
       if Natural (GNAT.String_Split.Slice_Count (Tokens)) /= 2 then
          raise Constraint_Error
            with "digital_io.input_signal_state requires 2 components";
@@ -215,11 +215,16 @@ after which we can instantiate `Callbacks`:
 ```
    package Input_Signal_State_Callbacks
    is new Scripted_Testing.Callbacks
-     (T                     => Digital_IO.Input_Signal_State,
-      Callback_Type_Name    => "digital_io.input_signal_state",
-      Value                 => Input_Signal_State_Value,
-      Application_Callbacks => Input_Signal_State_Callbacks_Signature);
+     (T                  => Digital_IO.Input_Signal_State,
+      Callback_Type_Name => "digital_io.input_signal_state",
+      Value              => Input_Signal_State_Value,
+      Call_Callbacks     =>
+        Digital_IO.Input_Signal_State_Callbacks.Call_Callbacks);
 ```
 
+----
 
+This may seem like quite a lot of work, but it can be reused without change for
 
+* changes to the SUT
+* other users of `Digital_IO`.

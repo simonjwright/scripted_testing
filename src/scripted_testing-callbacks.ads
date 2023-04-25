@@ -6,13 +6,10 @@
 --  has more than one component, it is to be passed as a list,
 --  {component-1 component-2 ...}.
 
-with Scripted_Testing.Callbacks_Signature;
-
 generic
    type T is private;
    Callback_Type_Name : String;
    with function Value (S : String) return T is <>;
-   with package Application_Callbacks
-     is new Scripted_Testing.Callbacks_Signature (T => T, Call_Callbacks => <>);
+   with procedure Call_Callbacks (With_Value : T);
 package Scripted_Testing.Callbacks with Elaborate_Body is
 end Scripted_Testing.Callbacks;
