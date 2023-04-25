@@ -21,8 +21,6 @@ with Tcl.Ada;
 
 package body Test is
 
-   function "+" (S : String) return Ada.Strings.Unbounded.Unbounded_String
-     renames Ada.Strings.Unbounded.To_Unbounded_String;
    function "+" (S : Ada.Strings.Unbounded.Unbounded_String) return String
      renames Ada.Strings.Unbounded.To_String;
 

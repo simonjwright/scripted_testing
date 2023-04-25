@@ -1,5 +1,8 @@
 name = "test"
 description = "Test for scripted_testing"
+long-description = """
+Tests for the internal Tcl commands.
+"""
 version = "2"
 
 authors = ["Simon Wright"]
@@ -7,6 +10,10 @@ maintainers = ["Simon Wright <simon@pushface.org>"]
 maintainers-logins = ["simonjwright"]
 
 executables = ["test"]
+
+[[actions]]
+type = "post-build"
+command = ["./test-main", "test.tcl"]
 
 [[depends-on]]
 scripted_testing = "*"

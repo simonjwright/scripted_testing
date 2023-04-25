@@ -15,7 +15,7 @@ package body Except is
    overriding
    procedure Execute (A : Except_Action);
 
-   function Tcl_Command
+   overriding function Tcl_Command
      (C      : not null access Except;
       Interp : not null        Tcl.Tcl_Interp;
       Argc   :                 Interfaces.C.int;
@@ -40,7 +40,7 @@ package body Except is
       return Tcl.TCL_OK;
    end Tcl_Command;
 
-   procedure Execute (A : Except_Action)
+   overriding procedure Execute (A : Except_Action)
    is
    begin
       Put_Line ("except called at " & A.Source_Line);

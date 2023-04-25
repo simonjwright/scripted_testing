@@ -13,7 +13,7 @@ package body Lists is
    overriding
    procedure Execute (A : Lists_Action);
 
-   function Tcl_Command
+   overriding function Tcl_Command
      (C      : not null access Lists;
       Interp : not null        Tcl.Tcl_Interp;
       Argc   :                 Interfaces.C.int;
@@ -32,13 +32,14 @@ package body Lists is
             pragma Import (C, Tcl_Free, "Tcl_Free");
          begin
             if Tcl.Ada.Tcl_SplitList (Interp,
-                                      Cargv.Arg (Argv, J),
+                                      CArgv.Arg (Argv, J),
                                       C'Access,
-                                      A'Access) /= Tcl.TCL_OK then
+                                      A'Access) /= Tcl.TCL_OK
+            then
                return Tcl.TCL_ERROR;
             else
                for K in 0 .. C - 1 loop
-                  Put_Line (J'Img & " " & K'Img & " " & Cargv.Arg (A, K));
+                  Put_Line (J'Img & " " & K'Img & " " & CArgv.Arg (A, K));
                end loop;
                Tcl_Free (A);
             end if;
@@ -47,7 +48,7 @@ package body Lists is
       return Tcl.TCL_OK;
    end Tcl_Command;
 
-   procedure Execute (A : Lists_Action)
+   overriding procedure Execute (A : Lists_Action)
    is
    begin
       Put_Line ("lists called at " & A.Source_Line);

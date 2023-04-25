@@ -13,7 +13,7 @@ package body First is
    overriding
    procedure Execute (A : First_Action);
 
-   function Tcl_Command
+   overriding function Tcl_Command
      (C      : not null access First;
       Interp : not null        Tcl.Tcl_Interp;
       Argc   :                 Interfaces.C.int;
@@ -33,7 +33,7 @@ package body First is
       return Tcl.TCL_OK;
    end Tcl_Command;
 
-   procedure Execute (A : First_Action)
+   overriding procedure Execute (A : First_Action)
    is
    begin
       Put_Line ("first called at " & A.Source_Line);
