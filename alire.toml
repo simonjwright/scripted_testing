@@ -32,7 +32,7 @@ It's assumed that the interface subprograms of the lower-level subsystems are st
 licenses = "GPL-3.0-or-later"
 website = "https://github.com/simonjwright/scripted_testing.git"
 tags = ["testing", "integration", "scripting"]
-version = "2.0.0"
+version = "2.1.0"
 
 authors = ["Simon Wright"]
 maintainers = ["Simon Wright <simon@pushface.org>"]
